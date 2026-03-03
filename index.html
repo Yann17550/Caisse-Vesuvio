@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Caisse - Le Vesuvio</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Ajout spécifique pour le sélecteur de service */
+        .service-picker {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 5px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        .service-picker button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            background: #333;
+            color: #888;
+        }
+        .service-picker button.active-midi { background: #f1c40f; color: #000; }
+        .service-picker button.active-soir { background: #3498db; color: #fff; }
+        
+        .pizza-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="service-picker">
+            <button id="btn-midi" onclick="app.setService('Midi')" class="active-midi">☀️ MIDI (Adipos)</button>
+            <button id="btn-soir" onclick="app.setService('Soir')">🌙 SOIR (Comptage)</button>
+        </div>
+
+        <section id="view-cards" class="view">
+            <header><h1>💳 Paiements Carte</h1></header>
+            <main>
+                <div class="card-section">
+                    <h2>CB Classique</h2>
+                    <div class="total-display">Total : <span id="total-cb">0.00</span> €</div>
+                    <div class="input-group"><label>Contact</label><input type="number" id="cb-contact" step="0.01" inputmode="decimal"></div>
+                    <div class="input-group"><label>Sans contact</label><input type="number" id="cb-sans-contact" step="0.01" inputmode="decimal"></div>
+                </div>
+
+                <div class="card-section">
+                    <h2>CB Ticket Restaurant</h2>
+                    <div class="total-display">Total : <span id="total-tr">0.00</span> €</div>
+                    <div class="input-group"><label>Contact</label><input type="number" id="tr-contact" step="0.01" inputmode="decimal"></div>
+                    <div class="input-group"><label>Sans contact</label><input type="number" id="tr-sans-contact" step="0.01" inputmode="decimal"></div>
+                </div>
+
+                <div class="card-section" style="border-left: 5px solid var(--accent);">
+                    <h2>MyPos</h2>
+                    <div class="total-display">Total : <span id="total-mypos">0.00</span> €</div>
+                    <div class="input-group">
+                        <label>Transaction MyPos (€)</label>
+                        <input type="number" id="mypos-amount" step="0.01" inputmode="decimal" placeholder="0.00">
+                    </div>
+                    <button class="btn-primary" style="width:100%; background: var(--accent);" onclick="app.addMyPos()">Ajouter MyPos</button>
+                    <div class="recap-list mini" id="mypos-recap"></div>
+                </div>
+            </main>
+        </section>
+
+        <section id="view-cash" class="view hidden">
+            <header><h1>💰 Espèces</h1></header>
+            <main>
+                <div class="card-section">
+                    <div class="total-display highlight">Net (Ventes) : <span id="total-cash-net">0.00</span> €</div>
+                    <div class="input-group">
+                        <label>Fond de caisse (€)</label>
+                        <input type="number" id="cash-offset" value="134" step="0.01" inputmode="decimal">
+                    </div>
+                    <p style="font-size: 0.8rem; color: #666; text-align: center;">Total compté : <span id="total-cash-brut">0.00</span> €</p>
+                    <div class="cash-grid" id="cash-container"></div>
+                </div>
+            </main>
+        </section>
+
+        <section id="view-others" class="view hidden">
+            <header><h1>🏖️ ANCV & Chèques</h1></header>
+            <main>
+                <div class="card-section">
+                    <div class="dual-total">
+                        <div class="total-box"><span>ANCV</span><strong id="total-ancv-all">0.00</strong>€</div>
+                        <div class="total-box"><span>Chèques</span><strong id="total-checks">0.00</strong>€</div>
+                    </div>
+                    <div class="input-group">
+                        <label>Ajouter Chèque (€)</label>
+                        <input type="number" id="check-amount" step="0.01" inputmode="decimal">
+                    </div>
+                    <button class="btn-primary" onclick="app.addCheck()">Ajouter Chèque</button>
+                    <div class="recap-list" id="checks-recap"></div>
+                </div>
+            </main>
+        </section>
+
+        <section id="view-pos" class="view hidden">
+            <header><h1>🖥️ Logiciel ADIPOS</h1></header>
+            <main>
+                <div class="card-section">
+                    <h2>Ventes Pizzas</h2>
+                    <div class="pizza-split">
+                        <div class="input-group">
+                            <label>Emporté</label>
+                            <input type="number" id="pos-pizzas-emporte" inputmode="numeric" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Sur Place</label>
+                            <input type="number" id="pos-pizzas-place" inputmode="numeric" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-section" id="section-logiciel-cash">
+                    <h2>Données Logiciel (Total Esp.)</h2>
+                    <div class="input-group"><label>Espèces Adipos</label><input type="number" id="pos-cash" step="0.01" inputmode="decimal"></div>
+                </div>
+
+                <div class="card-section">
+                    <h2>TVA du Service</h2>
+                    <div class="input-group"><label>TTC 5.5%</label><input type="number" id="tva-5" step="0.01" inputmode="decimal"></div>
+                    <div class="input-group"><label>TTC 10%</label><input type="number" id="tva-10" step="0.01" inputmode="decimal"></div>
+                    <div class="input-group"><label>TTC 20%</label><input type="number" id="tva-20" step="0.01" inputmode="decimal"></div>
+                </div>
+            </main>
+        </section>
+
+        <div id="modal-recap" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="recap-title">📊 Récapitulatif</h2>
+                <div id="recap-body"></div>
+                <button class="btn-primary" style="width:100%; margin-top:20px;" onclick="app.closeRecap()">Modifier</button>
+            </div>
+        </div>
+
+        <nav class="nav-bar">
+            <button onclick="app.showView('view-cards')">💳 CB</button>
+            <button onclick="app.showView('view-cash')">💰 Esp.</button>
+            <button onclick="app.showView('view-others')">🏖️ Etc.</button>
+            <button onclick="app.showView('view-pos')">🖥️ POS</button>
+            <button class="btn-recap-nav" onclick="app.openRecap()">📋 RÉCAP</button>
+        </nav>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
