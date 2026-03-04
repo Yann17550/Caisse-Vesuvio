@@ -8,9 +8,9 @@
 </head>
 <body>
     <div class="app-container">
-        <div class="service-picker" style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <button id="btn-midi" onclick="app.setService('Midi')" style="flex:1; padding:12px; border-radius:10px; border:none; font-weight:bold; background:#f1c40f;">☀️ MIDI</button>
-            <button id="btn-soir" onclick="app.setService('Soir')" style="flex:1; padding:12px; border-radius:10px; border:none; font-weight:bold; background:#333; color:#fff;">🌙 SOIR</button>
+        <div class="service-picker">
+            <button id="btn-midi" onclick="app.setService('Midi')">☀️ MIDI (Adipos)</button>
+            <button id="btn-soir" onclick="app.setService('Soir')">🌙 SOIR (Comptage)</button>
         </div>
 
         <section id="view-cards" class="view">
@@ -28,11 +28,11 @@
                     <div class="input-group"><label>Contact</label><input type="number" id="tr-contact" step="0.01" inputmode="decimal"></div>
                     <div class="input-group"><label>Sans contact</label><input type="number" id="tr-sans-contact" step="0.01" inputmode="decimal"></div>
                 </div>
-                <div class="card-section" style="border-left: 5px solid var(--accent);">
+                <div class="card-section" style="border-left: 5px solid #38bdf8;">
                     <h2>MyPos</h2>
                     <div class="total-display">Total : <span id="total-mypos">0.00</span> €</div>
                     <div class="input-group"><label>Montant (€)</label><input type="number" id="mypos-amount" step="0.01" inputmode="decimal"></div>
-                    <button class="btn-primary" style="width:100%; background: var(--accent);" onclick="app.addMyPos()">Ajouter MyPos</button>
+                    <button class="btn-primary" style="background:#38bdf8;" onclick="app.addMyPos()">Ajouter MyPos</button>
                     <div class="recap-list mini" id="mypos-recap"></div>
                 </div>
             </main>
@@ -44,6 +44,7 @@
                 <div class="card-section">
                     <div class="total-display highlight">Net (Ventes) : <span id="total-cash-net">0.00</span> €</div>
                     <div class="input-group"><label>Fond de caisse (€)</label><input type="number" id="cash-offset" value="134" step="0.01" inputmode="decimal"></div>
+                    <p style="text-align:center; font-size:0.8rem; color:#888;">Total compté : <span id="total-cash-brut">0.00</span> €</p>
                     <div class="cash-grid" id="cash-container"></div>
                 </div>
             </main>
@@ -58,12 +59,12 @@
                         <div class="total-box"><span>Connect</span><strong id="total-ancv-connect">0.00</strong>€</div>
                     </div>
                     <div class="ancv-form">
-                        <label>Type</label>
+                        <label>Type ANCV</label>
                         <div class="type-selector">
                             <input type="radio" id="type-paper" name="ancv-type" value="paper" checked>
-                            <label for="type-paper">Papier</label>
+                            <label for="type-paper">📄 Papier</label>
                             <input type="radio" id="type-connect" name="ancv-type" value="connect">
-                            <label for="type-connect">Connect</label>
+                            <label for="type-connect">📱 Connect</label>
                         </div>
                         <label>Valeur (€)</label>
                         <select id="ancv-val">
@@ -71,7 +72,7 @@
                             <option value="25">25 €</option><option value="50">50 €</option>
                         </select>
                         <label>Nombre</label>
-                        <input type="number" id="ancv-qty" inputmode="numeric" placeholder="0">
+                        <input type="number" id="ancv-qty" inputmode="numeric">
                         <div class="btn-row">
                             <button class="btn-primary" onclick="app.addAncv()">Valider</button>
                             <button class="btn-danger" onclick="app.resetAncvInputs()">RAZ</button>
@@ -83,12 +84,12 @@
         </section>
 
         <section id="view-checks" class="view hidden">
-            <header><h1>✍️ Chèques</h1></header>
+            <header><h1>✍️ Chèques Papier</h1></header>
             <main>
                 <div class="card-section">
                     <div class="total-display">Total : <span id="total-checks">0.00</span> €</div>
                     <div class="input-group"><label>Montant (€)</label><input type="number" id="check-amount" step="0.01" inputmode="decimal"></div>
-                    <button class="btn-primary" style="width:100%" onclick="app.addCheck()">Ajouter</button>
+                    <button class="btn-primary" style="width:100%" onclick="app.addCheck()">Ajouter Chèque</button>
                 </div>
                 <div class="recap-list" id="checks-recap"></div>
             </main>
@@ -103,8 +104,8 @@
                     <div class="input-group"><label>Sur Place</label><input type="number" id="pos-pizzas-p" inputmode="numeric"></div>
                 </div>
                 <div class="card-section">
-                    <h2>Données Logiciel</h2>
-                    <div class="input-group"><label>Espèces Adipos</label><input type="number" id="pos-cash" step="0.01" inputmode="decimal"></div>
+                    <h2>Caisse Logiciel</h2>
+                    <div class="input-group"><label>Total Espèces (Adipos)</label><input type="number" id="pos-cash" step="0.01" inputmode="decimal"></div>
                 </div>
                 <div class="card-section">
                     <h2>TVA TTC</h2>
@@ -115,10 +116,16 @@
             </main>
         </section>
 
-        <div id="modal-recap" class="modal hidden"><div class="modal-content"><h2>📊 Récapitulatif</h2><div id="recap-body"></div><button class="btn-primary" style="width:100%; margin-top:20px;" onclick="app.closeRecap()">Fermer</button></div></div>
+        <div id="modal-recap" class="modal hidden">
+            <div class="modal-content">
+                <h2>📊 Récapitulatif Final</h2>
+                <div id="recap-body"></div>
+                <button class="btn-primary" style="width:100%; margin-top:15px; background:#64748b;" onclick="app.closeRecap()">Modifier</button>
+            </div>
+        </div>
 
         <nav class="nav-bar">
-            <button onclick="app.showView('view-cards')">💳 CB</button>
+            <button onclick="app.showView('view-cards')">💳 Cartes</button>
             <button onclick="app.showView('view-cash')">💰 Esp.</button>
             <button onclick="app.showView('view-ancv')">🏖️ ANCV</button>
             <button onclick="app.showView('view-checks')">✍️ Chéq.</button>
