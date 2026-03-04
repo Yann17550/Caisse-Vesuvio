@@ -1,52 +1,60 @@
 :root {
-    --bg: #f3f4f6;
+    --bg: #f8fafc;
     --card: #ffffff;
-    --accent: #0284c7;
-    --text: #111827;
-    --border: #e5e7eb;
+    --text: #1e293b;
+    --border: #e2e8f0;
 }
 
-/* SUPPRIMER LES FLECHES */
+/* THÈME MIDI (Jaune/Ambre) */
+body.theme-midi {
+    --accent: #ca8a04; /* Jaune foncé lisible */
+    --nav-bg: #fff;
+}
+
+/* THÈME SOIR (Bleu) */
+body.theme-soir {
+    --accent: #0284c7; /* Bleu azur */
+    --nav-bg: #fff;
+}
+
+/* SUPPRESSION DES FLÈCHES */
 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }
 
-body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding-bottom: 100px; }
+body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; margin: 0; padding-bottom: 110px; transition: background 0.3s; }
 .app-container { max-width: 500px; margin: 0 auto; padding: 10px; }
 
-/* SERVICE */
-.service-picker { display: flex; gap: 8px; background: #e5e7eb; padding: 4px; border-radius: 12px; margin-bottom: 15px; }
-.service-picker button { flex: 1; border: none; padding: 12px; border-radius: 9px; font-weight: bold; cursor: pointer; }
+/* SERVICE PICKER */
+.service-picker { display: flex; gap: 8px; background: #e2e8f0; padding: 4px; border-radius: 12px; margin-bottom: 15px; }
+.service-picker button { flex: 1; border: none; padding: 12px; border-radius: 9px; font-weight: 800; color: #64748b; background: transparent; }
+.active-midi { background: #ca8a04 !important; color: white !important; }
+.active-soir { background: #0284c7 !important; color: white !important; }
 
 /* CARTES */
-.card-section { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-h2 { font-size: 0.9rem; color: #6b7280; text-transform: uppercase; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid var(--bg); padding-bottom: 5px; }
+.card-section { background: var(--card); border-radius: 16px; padding: 18px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+h1 { text-align: center; color: var(--accent); font-size: 1.3rem; margin: 5px 0 15px; }
+h2 { font-size: 0.85rem; color: #64748b; border-bottom: 2px solid var(--bg); padding-bottom: 6px; margin-bottom: 15px; text-transform: uppercase; }
 
-/* AFFICHAGE MONTANTS */
-.total-display { font-size: 1.5rem; font-weight: 800; text-align: center; background: #f9fafb; padding: 10px; border-radius: 10px; margin-bottom: 15px; }
+/* INPUTS */
+.total-display { font-size: 1.6rem; font-weight: 800; text-align: center; background: #f1f5f9; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
 .total-display span { color: var(--accent); }
 
 .input-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.input-group label { font-weight: 500; font-size: 1rem; }
-input[type="number"], select { background: #fff; border: 2px solid var(--border); padding: 10px; border-radius: 8px; width: 120px; text-align: right; font-size: 1.1rem; font-weight: bold; }
-input:focus { border-color: var(--accent); outline: none; }
+input[type="number"], select { background: #fff; border: 2px solid var(--border); padding: 10px; border-radius: 10px; width: 115px; text-align: right; font-size: 1.1rem; font-weight: 700; }
+input:focus { border-color: var(--accent); outline: none; background: #f0fdf4; }
 
-/* ESPECES GRID */
-.cash-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.cash-item label { font-weight: bold; }
-
-/* LISTES (ANCV, MYPOS, ETC) */
-.list-item { display: flex; justify-content: space-between; background: #f9fafb; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid var(--border); }
-.list-item button { background: none; border: none; font-size: 1.1rem; cursor: pointer; }
+/* LISTES */
+.list-item { display: flex; justify-content: space-between; background: #fff; padding: 12px; border-radius: 10px; margin-bottom: 6px; border: 1px solid var(--border); }
+.list-item button { border: none; background: transparent; color: #dc2626; font-size: 1.2rem; cursor: pointer; }
 
 /* NAVIGATION */
-.nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-.nav-bar button { background: transparent; border: none; color: #6b7280; font-size: 0.8rem; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; padding: 15px; border-top: 2px solid var(--bg); box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
+.nav-bar button { background: transparent; border: none; color: #64748b; font-size: 0.75rem; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .btn-recap-nav { color: var(--accent) !important; }
 
-/* RECAP FINAL (MODAL) */
+/* MODAL */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal-content { background: #fff; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
-.recap-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; }
-.recap-row span { color: #4b5563; }
-.btn-primary { width: 100%; padding: 15px; border-radius: 12px; border: none; background: #10b981; color: #fff; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+.modal-content { background: #fff; padding: 25px; border-radius: 24px; width: 92%; max-width: 400px; }
+.recap-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.btn-primary { width: 100%; padding: 16px; border-radius: 12px; border: none; background: #16a34a; color: #fff; font-weight: 800; font-size: 1.1rem; }
 .hidden { display: none !important; }
