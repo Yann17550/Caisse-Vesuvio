@@ -1,30 +1,30 @@
 /* =========================================
-   DESIGN SYSTEM - LE VESUVIO
+   DESIGN SYSTEM - LE VESUVIO (LUMINEUX)
    ========================================= */
 
 :root {
-    --bg-color: #0f172a;       /* Bleu nuit profond */
-    --card-bg: #1e293b;        /* Gris-bleu ardoise */
-    --text-color: #f8fafc;     /* Blanc cassé */
-    --accent: #38bdf8;         /* Bleu Vesuvio */
-    --success: #22c55e;        /* Vert validation */
-    --danger: #ef4444;         /* Rouge RAZ */
-    --warning: #f59e0b;        /* Orange Midi */
-    --border-radius: 12px;
+    --bg-color: #f0f2f5;       /* Gris très clair */
+    --card-bg: #ffffff;        /* Blanc pur */
+    --text-color: #1e293b;     /* Gris ardoise foncé */
+    --accent: #0284c7;         /* Bleu Azur */
+    --success: #16a34a;        /* Vert frais */
+    --danger: #dc2626;         /* Rouge vif */
+    --warning: #ca8a04;        /* Jaune foncé (Midi) */
+    --border: #e2e8f0;         /* Bordures discrètes */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-tap-highlight-color: transparent;
 }
 
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
-    padding-bottom: 80px; /* Espace pour la nav-bar fixe */
+    font-family: -apple-system, system-ui, sans-serif;
+    margin: 0;
+    padding-bottom: 90px;
 }
 
 .app-container {
@@ -33,72 +33,56 @@ body {
     padding: 15px;
 }
 
-h1 { font-size: 1.5rem; text-align: center; margin-bottom: 20px; }
-h2 { font-size: 1rem; color: var(--accent); margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 5px; }
-
-/* --- NAVIGATION SERVICE (MIDI/SOIR) --- */
+/* --- SERVICE PICKER --- */
 .service-picker {
     display: flex;
-    gap: 10px;
+    gap: 8px;
+    background: #e2e8f0;
+    padding: 4px;
+    border-radius: 12px;
     margin-bottom: 20px;
-    background: var(--card-bg);
-    padding: 6px;
-    border-radius: 15px;
 }
 
 .service-picker button {
     flex: 1;
     border: none;
     padding: 12px;
-    border-radius: 10px;
-    font-weight: 800;
-    font-size: 0.9rem;
+    border-radius: 9px;
+    font-weight: 700;
     cursor: pointer;
+    transition: 0.2s;
     background: transparent;
     color: #64748b;
-    transition: all 0.2s ease;
 }
 
-.service-picker button.active-midi {
-    background: var(--warning);
-    color: #000;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-}
-
-.service-picker button.active-soir {
-    background: var(--accent);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
-}
-
-/* --- CARTES ET SECTIONS --- */
-.view {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-.hidden { display: none !important; }
-
+/* --- CARDS --- */
 .card-section {
     background: var(--card-bg);
-    border-radius: var(--border-radius);
-    padding: 15px;
+    border-radius: 16px;
+    padding: 18px;
     margin-bottom: 15px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
 }
 
-/* --- INPUTS ET AFFICHAGE --- */
+h1 { text-align: center; color: var(--accent); font-size: 1.4rem; margin: 10px 0 20px; }
+h2 { font-size: 0.95rem; color: #475569; border-bottom: 2px solid var(--bg-color); padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* --- INPUTS --- */
 .total-display {
-    font-size: 1.4rem;
-    font-weight: bold;
+    font-size: 1.6rem;
+    font-weight: 800;
     text-align: center;
-    background: rgba(0,0,0,0.2);
-    padding: 10px;
-    border-radius: 8px;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 12px;
     margin-bottom: 15px;
+    color: var(--text-color);
+    border: 1px inset #f1f5f9;
 }
 
 .total-display span { color: var(--accent); }
-.highlight { border: 2px solid var(--accent); }
+.highlight { border: 2px solid var(--accent); background: #f0f9ff; }
 
 .input-group {
     display: flex;
@@ -107,108 +91,109 @@ h2 { font-size: 1rem; color: var(--accent); margin-bottom: 15px; border-bottom: 
     margin-bottom: 12px;
 }
 
-.input-group label { font-size: 0.9rem; color: #94a3b8; }
-
 input[type="number"], select {
-    background: #0f172a;
-    border: 1px solid #334155;
-    color: white;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    color: #1e293b;
     padding: 10px;
     border-radius: 8px;
-    width: 120px;
+    width: 110px;
     text-align: right;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
-input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+input:focus { border-color: var(--accent); outline: none; background: #f0f9ff; }
 
-/* --- GRILLE ESPÈCES --- */
-.cash-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.cash-item {
-    background: rgba(255,255,255,0.03);
-    padding: 10px;
-    border-radius: 8px;
+/* --- ANCV & TYPE SELECTOR --- */
+.type-selector {
     display: flex;
-    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-.cash-item label { font-size: 0.75rem; margin-bottom: 5px; color: #94a3b8; }
-.cash-item input { width: 100%; text-align: center; }
-
-/* --- BOUTONS --- */
-.btn-primary {
-    background: var(--success);
-    color: white;
-    border: none;
+.type-selector label {
+    flex: 1;
+    background: #f1f5f9;
     padding: 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    width: 100%;
+    text-align: center;
+    border-radius: 10px;
+    font-weight: 600;
     cursor: pointer;
+    border: 2px solid transparent;
 }
 
-.btn-primary:disabled { background: #475569; }
+.type-selector input:checked + label {
+    background: #e0f2fe;
+    border-color: var(--accent);
+    color: var(--accent);
+}
 
-/* --- BARRE DE NAVIGATION FIXE --- */
+.dual-total {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.total-box {
+    flex: 1;
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+
+/* --- NAVIGATION --- */
 .nav-bar {
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 100%;
-    background: #1e293b;
+    right: 0;
+    background: #ffffff;
     display: flex;
     justify-content: space-around;
-    padding: 10px;
-    border-top: 1px solid #334155;
-    z-index: 1000;
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
 }
 
 .nav-bar button {
     background: transparent;
     border: none;
-    color: #94a3b8;
+    color: #64748b;
     font-size: 0.75rem;
+    font-weight: 600;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
 }
 
-.btn-recap-nav {
-    color: var(--accent) !important;
-    font-weight: bold;
+.btn-recap-nav { color: var(--accent) !important; }
+
+/* --- BUTTONS --- */
+.btn-primary {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 4px 0 #15803d;
 }
 
-/* --- MODAL --- */
-.modal {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 2000;
-}
+.btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #15803d; }
 
+/* --- MODAL RECAP --- */
 .modal-content {
     background: white;
-    color: #1e293b;
-    padding: 20px;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 400px;
+    color: var(--text-color);
+    padding: 25px;
+    border-radius: 24px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
 }
 
-.recap-row {
-    display: flex;
-    justify-content: space-between;
-    margin: 8px 0;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+.recap-expert b { color: var(--accent); }
+hr { border: 0; border-top: 1px solid #f1f5f9; margin: 12px 0; }
