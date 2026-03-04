@@ -1,8 +1,7 @@
 const app = {
     state: { service: 'Midi', ancv: [], checks: [], mypos: [], midiData: null },
-    
     CONFIG: {
-        SCRIPT_URL: "TON_URL_SCRIPT_ICI", // À REMPLACER PAR TON LIEN GOOGLE SCRIPT
+        SCRIPT_URL: "TON_URL_SCRIPT", 
         DEFAULT_CASH_OFFSET: 134.00
     },
 
@@ -12,6 +11,7 @@ const app = {
         this.updateServiceUI();
         this.bindEvents();
         this.refreshUI();
+        this.showView('view-cards'); // Vue par défaut
     },
 
     setService(mode) {
@@ -25,11 +25,11 @@ const app = {
         const bm = document.getElementById('btn-midi');
         const bs = document.getElementById('btn-soir');
         if (this.state.service === 'Midi') {
-            bm.style.background = "#f1c40f"; bm.style.color = "#000";
-            bs.style.background = "#333"; bs.style.color = "#fff";
+            bm.style.background = "#ca8a04"; bm.style.color = "#fff";
+            bs.style.background = "#e2e8f0"; bs.style.color = "#64748b";
         } else {
-            bs.style.background = "#3498db"; bs.style.color = "#fff";
-            bm.style.background = "#333"; bm.style.color = "#fff";
+            bs.style.background = "#0284c7"; bs.style.color = "#fff";
+            bm.style.background = "#e2e8f0"; bm.style.color = "#64748b";
         }
     },
 
@@ -44,13 +44,13 @@ const app = {
         const container = document.getElementById('cash-container');
         container.innerHTML = units.map(u => `
             <div class="cash-item" style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                <label>${u}€</label>
-                <input type="number" data-unit="${u}" class="cash-in" inputmode="numeric" style="width:100px; text-align:right; padding:5px;">
+                <label style="font-weight:bold;">${u}€</label>
+                <input type="number" data-unit="${u}" class="cash-in" inputmode="numeric">
             </div>
         `).join('');
     },
 
-    // --- GESTION DES LISTES ---
+    // --- LOGIQUE IDENTIQUE DOLUS ---
     addAncv() {
         const val = parseFloat(document.getElementById('ancv-val').value);
         const qty = parseInt(document.getElementById('ancv-qty').value) || 0;
@@ -72,13 +72,12 @@ const app = {
     },
     removeMyPos(idx) { this.state.mypos.splice(idx, 1); this.refreshUI(); },
 
-    // --- CALCULS & UI ---
     refreshUI() {
         const v = id => parseFloat(document.getElementById(id).value) || 0;
         const txt = (id, val) => document.getElementById(id).textContent = val.toFixed(2);
 
-        txt('total-cb', v('cb-contact') + v('cb-sans-contact'));
-        txt('total-tr', v('tr-contact') + v('tr-sans-contact'));
+        txt('total-cb', (v('cb-contact') + v('cb-sans-contact')));
+        txt('total-tr', (v('tr-contact') + v('tr-sans-contact')));
         txt('total-mypos', this.state.mypos.reduce((a, b) => a + b, 0));
         txt('total-checks', this.state.checks.reduce((a, b) => a + b, 0));
         txt('total-ancv-paper', this.state.ancv.filter(i=>i.type==='paper').reduce((a,b)=>a+(b.val*b.qty),0));
@@ -94,12 +93,11 @@ const app = {
     },
 
     renderRecaps() {
-        document.getElementById('ancv-recap').innerHTML = this.state.ancv.map((item, idx) => `<div class="recap-item"><span>${item.type==='paper'?'📄':'📱'} ${item.qty}x${item.val}€</span><button onclick="app.removeAncv(${idx})">❌</button></div>`).join('');
-        document.getElementById('checks-recap').innerHTML = this.state.checks.map((amt, idx) => `<div class="recap-item"><span>${amt.toFixed(2)}€</span><button onclick="app.removeCheck(${idx})">❌</button></div>`).join('');
-        document.getElementById('mypos-recap').innerHTML = this.state.mypos.map((amt, idx) => `<div class="recap-item"><span>${amt.toFixed(2)}€</span><button onclick="app.removeMyPos(${idx})">❌</button></div>`).join('');
+        document.getElementById('ancv-recap').innerHTML = this.state.ancv.map((item, idx) => `<div class="recap-item" style="display:flex; justify-content:space-between; background:#f1f5f9; margin-bottom:5px; padding:5px; border-radius:5px;"><span>${item.type==='paper'?'📄':'📱'} ${item.qty}x${item.val}€</span><button onclick="app.removeAncv(${idx})">❌</button></div>`).join('');
+        document.getElementById('checks-recap').innerHTML = this.state.checks.map((amt, idx) => `<div class="recap-item" style="display:flex; justify-content:space-between; background:#f1f5f9; margin-bottom:5px; padding:5px; border-radius:5px;"><span>${amt.toFixed(2)}€</span><button onclick="app.removeCheck(${idx})">❌</button></div>`).join('');
+        document.getElementById('mypos-recap').innerHTML = this.state.mypos.map((amt, idx) => `<div class="recap-item" style="display:flex; justify-content:space-between; background:#f1f5f9; margin-bottom:5px; padding:5px; border-radius:5px;"><span>${amt.toFixed(2)}€</span><button onclick="app.removeMyPos(${idx})">❌</button></div>`).join('');
     },
 
-    // --- RÉCAPITULATIF COMPLET ---
     openRecap() {
         const v = id => parseFloat(document.getElementById(id).value) || 0;
         const txt = id => parseFloat(document.getElementById(id).textContent) || 0;
@@ -115,38 +113,32 @@ const app = {
             posCashLogiciel: v('pos-cash')
         };
 
-        // Soustraction MIDI si c'est le SOIR
         let final = { ...raw };
-        let infoMidi = "";
         if (this.state.service === 'Soir' && this.state.midiData) {
             const m = this.state.midiData;
             ['cb','tr','mypos','cashNet','ancvP','ancvC','checks','tva5','tva10','tva20','posCashLogiciel'].forEach(k => {
                 final[k] = parseFloat((raw[k] - m[k]).toFixed(2));
             });
-            infoMidi = `<p style="color:#3498db; font-size:0.75rem; margin-bottom:10px;">ℹ️ Les données du midi ont été déduites.</p>`;
         }
 
         const delta = parseFloat((final.cashNet - final.posCashLogiciel).toFixed(2));
         this.lastExport = { ...final, deltaCash: delta };
 
         document.getElementById('recap-body').innerHTML = `
-            <div class="recap-expert">
-                <p style="text-align:center; font-weight:bold;">SERVICE : ${final.service}</p>
-                ${infoMidi}
+            <div style="text-align:left;">
+                <p><b>SERVICE :</b> ${final.service}</p>
                 <hr>
                 <p>🍕 Pizzas : <b>${final.pizzas_e} E / ${final.pizzas_p} P</b></p>
                 <p>💳 CB : <b>${final.cb.toFixed(2)}€</b> | 🎫 TR : <b>${final.tr.toFixed(2)}€</b></p>
                 <p>🏖️ ANCV (P/C) : <b>${final.ancvP.toFixed(2)} / ${final.ancvC.toFixed(2)}€</b></p>
                 <p>✍️ Chèques : <b>${final.checks.toFixed(2)}€</b></p>
-                <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin:10px 0; color:#000;">
+                <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin:10px 0;">
                     <p>💵 Écart Espèces : <b style="color:${delta < 0 ? 'red' : 'green'}">${delta > 0 ? '+' : ''}${delta.toFixed(2)}€</b></p>
                     <p>📱 MyPos : <b>${final.mypos.toFixed(2)}€</b></p>
                 </div>
-                <p style="font-size:0.8rem;">📊 TVA : 5.5% : ${final.tva5}€ | 10% : ${final.tva10}€ | 20% : ${final.tva20}€</p>
-                <hr>
-                <p style="text-align:center; font-size:1.2rem; font-weight:bold;">TOTAL : ${(final.cb+final.tr+final.cashNet+final.ancvP+final.ancvC+final.checks+final.mypos).toFixed(2)}€</p>
+                <p style="font-size:0.8rem;">📊 TVA : 5.5%:${final.tva5}€ | 10%:${final.tva10}€ | 20%:${final.tva20}€</p>
+                <button class="btn-primary" style="margin-top:15px;" onclick="app.send()">💾 ARCHIVER</button>
             </div>
-            <button class="btn-primary" style="width:100%; margin-top:15px;" onclick="app.send()">🚀 VALIDER & ARCHIVER</button>
         `;
         document.getElementById('modal-recap').classList.remove('hidden');
     },
@@ -155,7 +147,6 @@ const app = {
         const btn = document.querySelector('#modal-recap .btn-primary');
         btn.disabled = true; btn.textContent = "🚀 Envoi...";
         
-        // On sauvegarde le BRUT du midi pour la soustraction du soir
         const rawToSave = {
             cb: parseFloat(document.getElementById('total-cb').textContent),
             tr: parseFloat(document.getElementById('total-tr').textContent),
@@ -174,15 +165,10 @@ const app = {
         .then(() => {
             if (this.state.service === 'Midi') this.state.midiData = rawToSave;
             else this.state.midiData = null;
-            
-            btn.textContent = "✅ ARCHIVÉ";
-            setTimeout(() => {
-                this.resetAll();
-                this.closeRecap();
-                if (this.state.service === 'Midi') this.setService('Soir');
-                else this.setService('Midi');
-            }, 1000);
-        }).catch(() => { alert("Erreur connexion"); btn.disabled = false; });
+            this.resetAll();
+            this.closeRecap();
+            if (this.state.service === 'Midi') this.setService('Soir');
+        });
     },
 
     resetAll() {
@@ -192,8 +178,8 @@ const app = {
     },
 
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v2', JSON.stringify(this.state)); },
-    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v2')); if(s) this.state = s; },
+    saveToStorage() { localStorage.setItem('vesuvio_v4', JSON.stringify(this.state)); },
+    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v4')); if(s) this.state = s; },
     bindEvents() { document.addEventListener('input', () => this.refreshUI()); }
 };
 document.addEventListener('DOMContentLoaded', () => app.init());
