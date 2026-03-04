@@ -120,6 +120,7 @@ const app = {
         };
 
         let final = { ...raw };
+        // Si c'est le soir, on soustrait les données du midi pour avoir le service pur
         if (this.state.service === 'Soir' && this.state.midiData) {
             const m = this.state.midiData;
             ['cb','tr','mypos','cashNet','ancvP','ancvC','checks','tva5','tva10','tva20','posCashLogiciel'].forEach(k => {
@@ -132,22 +133,25 @@ const app = {
 
         document.getElementById('recap-body').innerHTML = `
             <div class="recap-list-final">
-                <div class="recap-row"><span>Service</span> <b>${final.service}</b></div>
+                <div class="recap-row"><span>Service</span> <b>${final.service.toUpperCase()}</b></div>
                 <div class="recap-row"><span>Pizzas Emportées</span> <b>${final.pizzas_e}</b></div>
                 <div class="recap-row"><span>Pizzas Sur Place</span> <b>${final.pizzas_p}</b></div>
                 <hr>
                 <div class="recap-row"><span>Cartes Bancaires</span> <b>${final.cb.toFixed(2)}€</b></div>
                 <div class="recap-row"><span>Tickets Resto (CB)</span> <b>${final.tr.toFixed(2)}€</b></div>
-                <div class="recap-row"><span>ANCV Papier</span> <b>${final.ancvP.toFixed(2)}€</b></div>
-                <div class="recap-row"><span>ANCV Connect</span> <b>${final.ancvC.toFixed(2)}€</b></div>
+                <div class="recap-row"><span>ANCV (Papier + Connect)</span> <b>${(final.ancvP + final.ancvC).toFixed(2)}€</b></div>
                 <div class="recap-row"><span>Chèques</span> <b>${final.checks.toFixed(2)}€</b></div>
                 <div class="recap-row"><span>MyPos</span> <b>${final.mypos.toFixed(2)}€</b></div>
                 <hr>
-                <div class="recap-row"><span>Espèces (En caisse)</span> <b>${final.cashBrut.toFixed(2)}€</b></div>
                 <div class="recap-row"><span>Espèces (Ventes)</span> <b>${final.cashNet.toFixed(2)}€</b></div>
                 <div class="recap-row" style="background:${delta < 0 ? '#fee2e2' : '#f0fdf4'}; padding:5px; border-radius:5px;">
-                    <span>Écart Caisse</span> <b style="color:${delta < 0 ? 'red' : 'green'}">${delta > 0 ? '+' : ''}${delta.toFixed(2)}€</b>
+                    <span>Écart Caisse / Adipos</span> <b style="color:${delta < 0 ? 'red' : 'green'}">${delta > 0 ? '+' : ''}${delta.toFixed(2)}€</b>
                 </div>
+                <hr>
+                <p style="font-size:0.8rem; font-weight:bold; color:#6b7280; margin-bottom:5px;">DÉTAIL TVA (TTC)</p>
+                <div class="recap-row" style="font-size:0.9rem;"><span>Taux 5.5%</span> <b>${final.tva5.toFixed(2)}€</b></div>
+                <div class="recap-row" style="font-size:0.9rem;"><span>Taux 10%</span> <b>${final.tva10.toFixed(2)}€</b></div>
+                <div class="recap-row" style="font-size:0.9rem;"><span>Taux 20%</span> <b>${final.tva20.toFixed(2)}€</b></div>
             </div>
             <button class="btn-primary" style="margin-top:20px;" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
         `;
