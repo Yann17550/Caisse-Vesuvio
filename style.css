@@ -1,216 +1,259 @@
 /* =========================================
-   DESIGN SYSTEM - LE VESUVIO (THEME COULEUR TOTAL)
+   DESIGN SYSTEM - LE VESUVIO (VERSION FINALE)
+   Alignement parfait et thèmes contrastés
    ========================================= */
 
 :root {
-    /* Base Clarté pour toutes les cartes */
-    --card-bg: #ffffff;
-    --text-color: #1e293b;
+    --card: #ffffff;
+    --text: #1e293b;
     --border: #e2e8f0;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* --- THÈME MIDI (Jaune Solaire) --- */
-body.theme-midi {
-    --bg-color: #fbbf24;       /* Jaune Ambré fort */
-    --accent: #ca8a04;         /* Jaune foncé pour contrastes */
-    --text-on-bg: #000000;      /* Texte noir sur fond jaune */
+/* --- THÈMES DYNAMIQUES --- */
+body.theme-midi { 
+    --bg: #fbbf24;       /* Jaune Ambré */
+    --accent: #ca8a04;    /* Jaune foncé pour contrastes */
+    --nav-txt: #000000; 
 }
 
-/* --- THÈME SOIR (Bleu Profond) --- */
-body.theme-soir {
-    --bg-color: #0ea5e9;       /* Bleu Azur fort */
-    --accent: #0284c7;         /* Bleu Roi pour contrastes */
-    --text-on-bg: #ffffff;      /* Texte blanc sur fond bleu */
+body.theme-soir { 
+    --bg: #0ea5e9;       /* Bleu Azur */
+    --accent: #0284c7;    /* Bleu Roi */
+    --nav-txt: #ffffff; 
 }
 
-/* --- BASES --- */
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+/* --- BASES & RESET --- */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+input::-webkit-outer-spin-button, 
+input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+
+body { 
+    background-color: var(--bg); 
+    color: var(--text); 
+    font-family: system-ui, -apple-system, sans-serif; 
+    margin: 0; 
+    padding-bottom: 130px; 
+    transition: background-color 0.3s ease; 
 }
 
-body {
-    background-color: var(--bg-color); /* Couleur du service */
-    color: var(--text-color);
-    font-family: system-ui, -apple-system, sans-serif;
-    margin: 0;
-    padding-bottom: 110px; /* Espace pour la navigation */
-    transition: background-color 0.3s ease; /* Transition douce */
+.app-container { max-width: 500px; margin: 0 auto; padding: 12px; }
+
+/* --- SÉLECTEUR SERVICE (HAUT) --- */
+.service-picker { 
+    display: flex; 
+    gap: 8px; 
+    background: rgba(0,0,0,0.15); 
+    padding: 6px; 
+    border-radius: 14px; 
+    margin-bottom: 20px; 
 }
 
-.app-container {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 15px;
-}
-
-/* --- SERVICE PICKER --- */
-.service-picker {
-    display: flex;
-    gap: 8px;
-    background: rgba(0,0,0,0.1); /* Léger fond pour les boutons */
-    padding: 5px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-}
-
-.service-picker button {
-    flex: 1;
-    border: none;
-    padding: 12px;
-    border-radius: 9px;
-    font-weight: 800;
-    cursor: pointer;
+.service-picker button { 
+    flex: 1; 
+    border: none; 
+    padding: 14px; 
+    border-radius: 10px; 
+    font-weight: 900; 
+    cursor: pointer; 
     background: transparent;
-    color: var(--text-on-bg); /* S'adapte au fond */
-    opacity: 0.6;
+    color: white;
+    opacity: 0.5;
+    transition: 0.2s;
 }
 
-.active-midi { 
-    background: #ca8a04 !important; /* Jaune foncé */
-    color: white !important; 
-    opacity: 1 !important; 
-}
-.active-soir { 
-    background: #0284c7 !important; /* Bleu foncé */
-    color: white !important; 
-    opacity: 1 !important; 
-}
+.active-midi { background: #ca8a04 !important; opacity: 1 !important; box-shadow: var(--shadow); }
+.active-soir { background: #0284c7 !important; opacity: 1 !important; box-shadow: var(--shadow); }
 
-/* --- CARTES ET SECTIONS --- */
+/* --- CARTES ET TITRES --- */
 h1 { 
     text-align: center; 
-    color: var(--text-on-bg); /* S'adapte au fond */
-    font-size: 1.5rem; 
-    margin: 10px 0 25px; 
+    color: white; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+    font-size: 1.6rem; 
+    margin: 10px 0 20px; 
 }
 
-.card-section {
-    background: var(--card-bg); /* Toujours blanc */
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 15px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
+.card-section { 
+    background: var(--card); 
+    border-radius: 18px; 
+    padding: 20px; 
+    margin-bottom: 15px; 
+    box-shadow: var(--shadow); 
+    border: 1px solid var(--border); 
 }
 
 h2 { 
-    font-size: 0.9rem; 
+    font-size: 0.85rem; 
     color: #64748b; 
     border-bottom: 2px solid #f1f5f9; 
-    padding-bottom: 8px; 
+    padding-bottom: 6px; 
     margin-bottom: 15px; 
     text-transform: uppercase; 
-    letter-spacing: 0.5px; 
+    letter-spacing: 1px;
 }
 
-/* --- INPUTS & MONTANTS --- */
-.total-display {
-    font-size: 1.7rem;
-    font-weight: 800;
-    text-align: center;
-    background: #f8fafc;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 15px;
+/* --- ALIGNEMENT DES INPUTS (LA CLÉ) --- */
+.input-group, .input-group-list, .cash-item { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 10px 0; 
+    border-bottom: 1px solid #f8fafc;
 }
 
-.total-display span { color: var(--accent); }
-.highlight { border: 2px solid var(--accent); background: #f0f9ff; }
+.input-group:last-child, .input-group-list:last-child { border-bottom: none; }
 
-.input-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
+label { 
+    font-weight: 700; 
+    font-size: 1rem; 
+    color: #334155; 
+    flex: 1; /* Pousse l'input à droite */
+    padding-right: 15px;
 }
 
-input[type="number"], select {
-    background: #ffffff;
-    border: 2px solid var(--border);
+input[type="number"], select { 
+    width: 140px; /* Largeur fixe pour l'alignement vertical parfait */
+    min-width: 140px;
+    background: #f8fafc; 
+    border: 2px solid var(--border); 
+    padding: 12px; 
+    border-radius: 10px; 
+    text-align: right; 
+    font-size: 1.2rem; 
+    font-weight: 800; 
     color: #1e293b;
-    padding: 10px;
-    border-radius: 8px;
-    width: 115px;
-    text-align: right;
-    font-size: 1.1rem;
-    font-weight: 700;
+    transition: border-color 0.2s;
 }
 
-input:focus { border-color: var(--accent); outline: none; background: #f0fdf4; }
+input:focus { border-color: var(--accent); outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
 
-/* ESPECES GRID */
-.cash-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.cash-item label { font-weight: bold; font-size: 1.1rem; }
+/* --- AFFICHAGES SPECIAUX --- */
+.total-display { 
+    font-size: 1.8rem; 
+    font-weight: 900; 
+    text-align: center; 
+    background: #f1f5f9; 
+    padding: 15px; 
+    border-radius: 12px; 
+    margin-bottom: 15px; 
+    border: 2px dashed var(--border);
+}
+.total-display span { color: var(--accent); }
+.highlight { border: 2px solid var(--accent) !important; background: #f0f9ff !important; }
 
-/* LISTES (ANCV, ETC) */
+/* --- LISTES (ANCV, MYPOS, CHEQUES) --- */
+.recap-mini { margin-top: 15px; }
 .list-item { 
     display: flex; 
     justify-content: space-between; 
+    align-items: center;
     background: #f9fafb; 
-    padding: 12px; 
+    padding: 12px 15px; 
     border-radius: 10px; 
-    margin-bottom: 6px; 
-    border: 1px solid var(--border); 
+    margin-bottom: 8px; 
+    border-left: 4px solid var(--accent);
 }
+.list-item span { font-weight: 700; font-size: 0.95rem; }
 .list-item button { 
     border: none; 
-    background: transparent; 
-    color: #dc2626; 
-    font-size: 1.2rem; 
+    background: #fee2e2; 
+    color: #ef4444; 
+    padding: 8px; 
+    border-radius: 8px; 
+    font-size: 1rem; 
     cursor: pointer; 
 }
 
-/* --- NAVIGATION FIXE --- */
-.nav-bar {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: #ffffff;
-    display: flex;
-    justify-content: space-around;
-    padding: 15px;
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+/* --- NAVIGATION BASSE --- */
+.nav-bar { 
+    position: fixed; 
+    bottom: 0; left: 0; right: 0; 
+    background: #ffffff; 
+    display: flex; 
+    justify-content: space-around; 
+    padding: 15px 5px; 
+    border-top: 2px solid rgba(0,0,0,0.05); 
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
     z-index: 100;
 }
 
-.nav-bar button {
-    background: transparent;
-    border: none;
-    color: #64748b;
-    font-size: 0.75rem;
-    font-weight: 800;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
+.nav-bar button { 
+    background: transparent; 
+    border: none; 
+    color: #64748b; 
+    font-size: 0.75rem; 
+    font-weight: 800; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 6px; 
+    flex: 1;
 }
 
-.btn-recap-nav { color: var(--accent) !important; }
+.btn-recap-nav { color: var(--accent) !important; transform: scale(1.1); }
 
-/* --- MODAL RECAP --- */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal-content { background: #fff; padding: 25px; border-radius: 24px; width: 92%; max-width: 420px; max-height: 90vh; overflow-y: auto; }
-.recap-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1rem; }
-.recap-row span { color: #4b5563; }
-.recap-row b { font-weight: 800; }
+/* --- MODAL RÉCAPITULATIF --- */
+.modal { 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(0,0,0,0.7); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    z-index: 2000; 
+    padding: 15px;
+}
+
+.modal-content { 
+    background: #ffffff; 
+    padding: 25px; 
+    border-radius: 28px; 
+    width: 100%; 
+    max-width: 420px; 
+    max-height: 85vh; 
+    overflow-y: auto; 
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+}
+
+.recap-list-final hr { border: none; border-top: 2px dashed #e2e8f0; margin: 15px 0; }
+
+.recap-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 1.05rem; }
+.recap-row span { color: #64748b; font-weight: 500; }
+.recap-row b { font-weight: 900; color: #1e293b; }
 
 .btn-primary { 
     width: 100%; 
-    padding: 16px; 
-    border-radius: 12px; 
+    padding: 18px; 
+    border-radius: 14px; 
     border: none; 
-    background: #16a34a; /* Vert succès */
-    color: #fff; 
-    font-weight: 800; 
-    font-size: 1.1rem; 
+    background: #10b981; 
+    color: white; 
+    font-weight: 900; 
+    font-size: 1.2rem; 
+    cursor: pointer; 
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
 }
 
 .hidden { display: none !important; }
 
-/* ANCV & TYPE SELECTOR */
+/* --- ANCV SELECTOR --- */
 .type-selector { display: flex; gap: 10px; margin-bottom: 15px; }
-.type-selector label { flex: 1; background: #f1f5f9; padding: 12px; text-align: center; border-radius: 10px; font-weight: 700; cursor: pointer; }
-.type-selector input:checked + label { background: #e0f2fe; color: var(--accent); border: 1px solid var(--accent); }
+.type-selector label { 
+    flex: 1; 
+    background: #f1f5f9; 
+    padding: 14px; 
+    text-align: center; 
+    border-radius: 12px; 
+    font-weight: 800; 
+    cursor: pointer; 
+    border: 2px solid transparent;
+}
+.type-selector input:checked + label { 
+    background: #fff; 
+    color: var(--accent); 
+    border-color: var(--accent); 
+}
 .type-selector input { display: none; }
