@@ -1,7 +1,7 @@
 const app = {
     state: { service: 'Midi', ancv: [], checks: [], mypos: [], midiData: null },
     CONFIG: { 
-        SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec", 
+        SCRIPT_URL: "TON_URL_SCRIPT", 
         DEFAULT_CASH_OFFSET: 134.00 
     },
 
@@ -17,6 +17,7 @@ const app = {
     setService(mode) {
         this.state.service = mode;
         this.updateServiceUI();
+        this.updateTheme(); // Change les couleurs
         this.refreshUI();
         this.saveToStorage();
     },
@@ -25,11 +26,19 @@ const app = {
         const bm = document.getElementById('btn-midi');
         const bs = document.getElementById('btn-soir');
         if (this.state.service === 'Midi') {
-            bm.style.background = "#ca8a04"; bm.style.color = "#fff";
-            bs.style.background = "#e2e8f0"; bs.style.color = "#64748b";
+            bm.classList.add('active-midi');
+            bs.classList.remove('active-soir');
         } else {
-            bs.style.background = "#0284c7"; bs.style.color = "#fff";
-            bm.style.background = "#e2e8f0"; bm.style.color = "#64748b";
+            bs.classList.add('active-soir');
+            bm.classList.remove('active-midi');
+        }
+    },
+
+    updateTheme() {
+        if (this.state.service === 'Midi') {
+            document.body.className = 'theme-midi';
+        } else {
+            document.body.className = 'theme-soir';
         }
     },
 
@@ -50,7 +59,6 @@ const app = {
         `).join('');
     },
 
-    // --- LOGIQUE IDENTIQUE DOLUS ---
     addAncv() {
         const val = parseFloat(document.getElementById('ancv-val').value);
         const qty = parseInt(document.getElementById('ancv-qty').value) || 0;
@@ -93,8 +101,8 @@ const app = {
 
     renderRecaps() {
         document.getElementById('ancv-recap').innerHTML = this.state.ancv.map((item, idx) => `<div class="list-item"><span>${item.type==='paper'?'Papier':'Connect'} ${item.qty}x${item.val}€</span><button onclick="app.removeAncv(${idx})">❌</button></div>`).join('');
-        document.getElementById('checks-recap').innerHTML = this.state.checks.map((amt, idx) => `<div class="list-item"><span>Chèque de ${amt.toFixed(2)}€</span><button onclick="app.removeCheck(${idx})">❌</button></div>`).join('');
-        document.getElementById('mypos-recap').innerHTML = this.state.mypos.map((amt, idx) => `<div class="list-item"><span>MyPos de ${amt.toFixed(2)}€</span><button onclick="app.removeMyPos(${idx})">❌</button></div>`).join('');
+        document.getElementById('checks-recap').innerHTML = this.state.checks.map((amt, idx) => `<div class="list-item"><span>Chèque ${amt.toFixed(2)}€</span><button onclick="app.removeCheck(${idx})">❌</button></div>`).join('');
+        document.getElementById('mypos-recap').innerHTML = this.state.mypos.map((amt, idx) => `<div class="list-item"><span>MyPos ${amt.toFixed(2)}€</span><button onclick="app.removeMyPos(${idx})">❌</button></div>`).join('');
     },
 
     openRecap() {
@@ -103,24 +111,16 @@ const app = {
 
         const raw = {
             service: this.state.service,
-            pizzas_e: v('pos-pizzas-e'), 
-            pizzas_p: v('pos-pizzas-p'),
-            cb: txt('total-cb'), 
-            tr: txt('total-tr'), 
-            mypos: txt('total-mypos'),
-            cashBrut: txt('total-cash-brut'),
-            cashNet: txt('total-cash-net'),
-            ancvP: txt('total-ancv-paper'), 
-            ancvC: txt('total-ancv-connect'),
+            pizzas_e: v('pos-pizzas-e'), pizzas_p: v('pos-pizzas-p'),
+            cb: txt('total-cb'), tr: txt('total-tr'), mypos: txt('total-mypos'),
+            cashBrut: txt('total-cash-brut'), cashNet: txt('total-cash-net'),
+            ancvP: txt('total-ancv-paper'), ancvC: txt('total-ancv-connect'),
             checks: txt('total-checks'),
-            tva5: v('tva-5'), 
-            tva10: v('tva-10'), 
-            tva20: v('tva-20'),
+            tva5: v('tva-5'), tva10: v('tva-10'), tva20: v('tva-20'),
             posCashLogiciel: v('pos-cash')
         };
 
         let final = { ...raw };
-        // Si c'est le soir, on soustrait les données du midi pour avoir le service pur
         if (this.state.service === 'Soir' && this.state.midiData) {
             const m = this.state.midiData;
             ['cb','tr','mypos','cashNet','ancvP','ancvC','checks','tva5','tva10','tva20','posCashLogiciel'].forEach(k => {
@@ -139,19 +139,18 @@ const app = {
                 <hr>
                 <div class="recap-row"><span>Cartes Bancaires</span> <b>${final.cb.toFixed(2)}€</b></div>
                 <div class="recap-row"><span>Tickets Resto (CB)</span> <b>${final.tr.toFixed(2)}€</b></div>
-                <div class="recap-row"><span>ANCV (Papier + Connect)</span> <b>${(final.ancvP + final.ancvC).toFixed(2)}€</b></div>
+                <div class="recap-row"><span>ANCV (Papier + Conn.)</span> <b>${(final.ancvP + final.ancvC).toFixed(2)}€</b></div>
                 <div class="recap-row"><span>Chèques</span> <b>${final.checks.toFixed(2)}€</b></div>
                 <div class="recap-row"><span>MyPos</span> <b>${final.mypos.toFixed(2)}€</b></div>
                 <hr>
                 <div class="recap-row"><span>Espèces (Ventes)</span> <b>${final.cashNet.toFixed(2)}€</b></div>
-                <div class="recap-row" style="background:${delta < 0 ? '#fee2e2' : '#f0fdf4'}; padding:5px; border-radius:5px;">
-                    <span>Écart Caisse / Adipos</span> <b style="color:${delta < 0 ? 'red' : 'green'}">${delta > 0 ? '+' : ''}${delta.toFixed(2)}€</b>
+                <div class="recap-row" style="background:${delta < 0 ? '#fee2e2' : '#f0fdf4'};">
+                    <span>Écart Caisse</span> <b style="color:${delta < 0 ? 'red' : 'green'}">${delta > 0 ? '+' : ''}${delta.toFixed(2)}€</b>
                 </div>
                 <hr>
-                <p style="font-size:0.8rem; font-weight:bold; color:#6b7280; margin-bottom:5px;">DÉTAIL TVA (TTC)</p>
-                <div class="recap-row" style="font-size:0.9rem;"><span>Taux 5.5%</span> <b>${final.tva5.toFixed(2)}€</b></div>
-                <div class="recap-row" style="font-size:0.9rem;"><span>Taux 10%</span> <b>${final.tva10.toFixed(2)}€</b></div>
-                <div class="recap-row" style="font-size:0.9rem;"><span>Taux 20%</span> <b>${final.tva20.toFixed(2)}€</b></div>
+                <div class="recap-row" style="font-size:0.85rem;"><span>TVA 5.5%</span> <b>${final.tva5.toFixed(2)}€</b></div>
+                <div class="recap-row" style="font-size:0.85rem;"><span>TVA 10%</span> <b>${final.tva10.toFixed(2)}€</b></div>
+                <div class="recap-row" style="font-size:0.85rem;"><span>TVA 20%</span> <b>${final.tva20.toFixed(2)}€</b></div>
             </div>
             <button class="btn-primary" style="margin-top:20px;" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
         `;
@@ -160,9 +159,8 @@ const app = {
 
     send() {
         const btn = document.querySelector('#modal-recap .btn-primary');
-        btn.disabled = true; btn.innerHTML = "⌛ Envoi en cours...";
+        btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
         
-        // On prépare la sauvegarde du cumul pour le soir
         const rawToSave = {
             cb: parseFloat(document.getElementById('total-cb').textContent),
             tr: parseFloat(document.getElementById('total-tr').textContent),
@@ -177,11 +175,7 @@ const app = {
             posCashLogiciel: parseFloat(document.getElementById('pos-cash').value) || 0
         };
 
-        fetch(this.CONFIG.SCRIPT_URL, { 
-            method: 'POST', 
-            mode: 'no-cors', 
-            body: JSON.stringify(this.lastExport) 
-        })
+        fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(this.lastExport) })
         .then(() => {
             if (this.state.service === 'Midi') this.state.midiData = rawToSave;
             else this.state.midiData = null;
@@ -190,11 +184,7 @@ const app = {
             alert("✅ Archivage réussi !");
             if (this.state.service === 'Midi') this.setService('Soir');
         })
-        .catch(err => {
-            alert("❌ Erreur lors de l'envoi");
-            btn.disabled = false;
-            btn.innerHTML = "💾 RÉESSAYER";
-        });
+        .catch(() => { alert("❌ Erreur"); btn.disabled = false; });
     },
 
     resetAll() {
@@ -204,8 +194,8 @@ const app = {
     },
 
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v5', JSON.stringify(this.state)); },
-    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v5')); if(s) this.state = s; },
+    saveToStorage() { localStorage.setItem('vesuvio_v6', JSON.stringify(this.state)); },
+    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v6')); if(s) { this.state = s; this.updateTheme(); } },
     bindEvents() { document.addEventListener('input', () => this.refreshUI()); }
 };
 document.addEventListener('DOMContentLoaded', () => app.init());
