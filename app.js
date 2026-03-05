@@ -1,24 +1,20 @@
-/**
- * APP LE VESUVIO - VERSION FINALE PRODUCTION
- * Gère le mode rapide (Midi) et complet (Soir)
- */
 const app = {
     state: {
         service: 'Midi',
         ancv: [],
         checks: [],
         mypos: [],
-        midiData: null // Stockage pour soustraction du soir
+        midiData: null 
     },
     CONFIG: {
-        SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec",
+        SCRIPT_URL: "TON_URL_SCRIPT",
         CASH_OFFSET: 134.00
     },
 
     init() {
         this.renderCashGrid();
         this.loadFromStorage();
-        this.setService(this.state.service); // Applique le thème et la vue au démarrage
+        this.setService(this.state.service);
         this.bindEvents();
         this.refreshUI();
     },
@@ -95,14 +91,12 @@ const app = {
     },
 
     refreshUI() {
-        // Calcul Espèces Soir
         let brut = 0;
         document.querySelectorAll('.cash-in').forEach(i => {
             brut += (parseFloat(i.dataset.unit) * (parseInt(i.value) || 0));
         });
         document.getElementById('cash-brut-soir').textContent = brut.toFixed(2);
 
-        // Recaps listes Soir
         document.getElementById('mypos-recap-soir').innerHTML = this.state.mypos.map((v, i) => `<div class="list-item"><span>MyPos ${v}€</span><button onclick="app.removeItem('mypos', ${i})">❌</button></div>`).join('');
         document.getElementById('checks-recap-soir').innerHTML = this.state.checks.map((v, i) => `<div class="list-item"><span>Chèque ${v}€</span><button onclick="app.removeItem('checks', ${i})">❌</button></div>`).join('');
         document.getElementById('ancv-recap-soir').innerHTML = this.state.ancv.map((v, i) => `<div class="list-item"><span>${v.type} ${v.qty}x${v.val}€</span><button onclick="app.removeItem('ancv', ${i})">❌</button></div>`).join('');
@@ -113,10 +107,12 @@ const app = {
     openRecap() {
         const v = id => parseFloat(document.getElementById(id).value) || 0;
         const txt = id => parseFloat(document.getElementById(id).textContent) || 0;
-        let final = {};
+        
+        let displayData = {}; // Ce que tu VOIS à l'écran (Le Cumul)
+        let exportData = {};  // Ce qu'on ENVOIE à la Sheet (La soustraction)
 
         if (this.state.service === 'Midi') {
-            final = {
+            displayData = {
                 service: 'Midi',
                 cb: v('midi-cb'), tr: v('midi-tr'), mypos: v('midi-mypos'),
                 cashNet: v('midi-cash'), ancvP: v('midi-ancv'), ancvC: 0,
@@ -124,9 +120,11 @@ const app = {
                 tva5: v('midi-tva5'), tva10: v('midi-tva10'), tva20: v('midi-tva20'),
                 posCashLogiciel: v('midi-cash'), deltaCash: 0
             };
+            exportData = { ...displayData };
         } else {
-            // CALCULS SOIR
-            const rawSoir = {
+            // COMPTAGE SOIR (CUMUL JOURNÉE)
+            displayData = {
+                service: 'Soir',
                 cb: v('cb-c-soir') + v('cb-sc-soir'),
                 tr: v('tr-c-soir') + v('tr-sc-soir'),
                 mypos: this.state.mypos.reduce((a, b) => a + b, 0),
@@ -138,39 +136,42 @@ const app = {
                 tva5: v('tva5-soir'), tva10: v('tva10-soir'), tva20: v('tva20-soir'),
                 posCashLogiciel: v('pos-cash-soir')
             };
+            displayData.deltaCash = parseFloat((displayData.cashNet - displayData.posCashLogiciel).toFixed(2));
 
-            final = { ...rawSoir, service: 'Soir' };
-            // Soustraction du Midi si présent
+            // CALCUL POUR LA SHEET (SOUTERRAIN)
+            exportData = { ...displayData };
             if (this.state.midiData) {
                 const m = this.state.midiData;
                 ['cb', 'tr', 'mypos', 'cashNet', 'ancvP', 'ancvC', 'checks', 'tva5', 'tva10', 'tva20', 'posCashLogiciel'].forEach(k => {
-                    final[k] = parseFloat((rawSoir[k] - m[k]).toFixed(2));
+                    exportData[k] = parseFloat((displayData[k] - m[k]).toFixed(2));
                 });
+                exportData.deltaCash = parseFloat((exportData.cashNet - exportData.posCashLogiciel).toFixed(2));
             }
-            final.deltaCash = parseFloat((final.cashNet - final.posCashLogiciel).toFixed(2));
         }
 
-        this.lastExport = final;
-        this.renderFinalRecap(final);
+        this.lastExport = exportData;
+        this.renderFinalRecap(displayData); // On affiche le cumul pour comparaison
     },
 
     renderFinalRecap(f) {
         document.getElementById('recap-body').innerHTML = `
             <div class="recap-list-final">
-                <div class="recap-row"><span>Service</span> <b>${f.service}</b></div>
+                <div class="recap-row"><span>Service</span> <b>${f.service.toUpperCase()}</b></div>
+                <p style="font-size:0.75rem; color:#64748b; margin:-5px 0 10px;">(Cumul total journée pour point de caisse)</p>
                 <div class="recap-row"><span>Pizzas</span> <b>${f.pizzas_e} E / ${f.pizzas_p} P</b></div>
                 <hr>
-                <div class="recap-row"><span>CB</span> <b>${f.cb.toFixed(2)}€</b></div>
-                <div class="recap-row"><span>TR</span> <b>${f.tr.toFixed(2)}€</b></div>
-                <div class="recap-row"><span>ANCV P/C</span> <b>${f.ancvP.toFixed(2)} / ${f.ancvC.toFixed(2)}€</b></div>
+                <div class="recap-row"><span>Cartes Bancaires</span> <b>${f.cb.toFixed(2)}€</b></div>
+                <div class="recap-row"><span>Tickets Resto</span> <b>${f.tr.toFixed(2)}€</b></div>
+                <div class="recap-row"><span>ANCV (Pap.+Conn.)</span> <b>${(f.ancvP + f.ancvC).toFixed(2)}€</b></div>
                 <div class="recap-row"><span>MyPos</span> <b>${f.mypos.toFixed(2)}€</b></div>
+                <div class="recap-row"><span>Chèques</span> <b>${f.checks.toFixed(2)}€</b></div>
                 <hr>
-                <div class="recap-row"><span>Net Espèces</span> <b>${f.cashNet.toFixed(2)}€</b></div>
-                <div class="recap-row" style="background:${f.deltaCash < 0 ? '#fee2e2' : '#f0fdf4'}">
-                    <span>Écart Caisse</span> <b>${f.deltaCash.toFixed(2)}€</b>
+                <div class="recap-row"><span>Espèces (Réel Net)</span> <b>${f.cashNet.toFixed(2)}€</b></div>
+                <div class="recap-row" style="background:${f.deltaCash < 0 ? '#fee2e2' : '#f0fdf4'}; padding:5px; border-radius:5px;">
+                    <span>Écart / Logiciel</span> <b style="color:${f.deltaCash < 0 ? 'red' : 'green'}">${f.deltaCash > 0 ? '+' : ''}${f.deltaCash.toFixed(2)}€</b>
                 </div>
                 <hr>
-                <div class="recap-row" style="font-size:0.8rem"><span>TVA 5.5 / 10 / 20</span> <b>${f.tva5} / ${f.tva10} / ${f.tva20}</b></div>
+                <div class="recap-row" style="font-size:0.85rem"><span>TVA 5.5 / 10 / 20</span> <b>${f.tva5} / ${f.tva10} / ${f.tva20}</b></div>
             </div>
             <button class="btn-primary" style="margin-top:15px" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
         `;
@@ -181,21 +182,28 @@ const app = {
         const btn = document.querySelector('#modal-recap .btn-primary');
         btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
 
-        // Sauvegarde du cumul pour le soir si on est le midi
+        // IMPORTANT: On stocke le cumul AVANT l'envoi pour que le soir puisse soustraire
         if (this.state.service === 'Midi') {
-            this.state.midiData = { ...this.lastExport };
+            // On récupère les valeurs de saisie actuelles pour le midiData
+            const v = id => parseFloat(document.getElementById(id).value) || 0;
+            this.state.midiData = {
+                cb: v('midi-cb'), tr: v('midi-tr'), mypos: v('midi-mypos'),
+                cashNet: v('midi-cash'), ancvP: v('midi-ancv'), ancvC: 0,
+                checks: v('midi-checks'), tva5: v('midi-tva5'), tva10: v('midi-tva10'), 
+                tva20: v('midi-tva20'), posCashLogiciel: v('midi-cash')
+            };
         } else {
-            this.state.midiData = null;
+            this.state.midiData = null; // Reset fin de journée
         }
 
         fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(this.lastExport) })
         .then(() => {
-            alert("✅ Service Archivé !");
+            alert("✅ Données envoyées à la Sheet !");
             this.resetForm();
             this.closeRecap();
             if (this.state.service === 'Midi') this.setService('Soir');
         })
-        .catch(() => { alert("Erreur connexion"); btn.disabled = false; });
+        .catch(() => { alert("Erreur de transmission"); btn.disabled = false; });
     },
 
     resetForm() {
@@ -205,8 +213,8 @@ const app = {
     },
 
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v7', JSON.stringify(this.state)); },
-    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v7')); if(s) this.state = s; },
+    saveToStorage() { localStorage.setItem('vesuvio_v8', JSON.stringify(this.state)); },
+    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v8')); if(s) this.state = s; },
     bindEvents() { document.addEventListener('input', () => this.refreshUI()); }
 };
 document.addEventListener('DOMContentLoaded', () => app.init());
