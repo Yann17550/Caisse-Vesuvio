@@ -11,7 +11,7 @@ const app = {
         midiData: null 
     },
     CONFIG: {
-        SCRIPT_URL: "TON_URL_SCRIPT",
+        SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec",
         CASH_OFFSET: 134.00
     },
 
