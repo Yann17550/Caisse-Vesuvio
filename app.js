@@ -1,7 +1,3 @@
-/**
- * APP LE VESUVIO - VERSION FINALE (V10)
- * Gère le mode MIDI (Saisie rapide) et CLÔTURE (Comptage complet)
- */
 const app = {
     state: {
         service: 'Midi',
@@ -11,7 +7,7 @@ const app = {
         midiData: null 
     },
     CONFIG: {
-        SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec",
+        SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec", // À METTRE À JOUR
         CASH_OFFSET: 134.00
     },
 
@@ -100,10 +96,15 @@ const app = {
             brut += (parseFloat(i.dataset.unit) * (parseInt(i.value) || 0));
         });
         document.getElementById('cash-brut-soir').textContent = brut.toFixed(2);
-
-        document.getElementById('mypos-recap-soir').innerHTML = this.state.mypos.map((v, i) => `<div class="list-item"><span>MyPos ${v}€</span><button onclick="app.removeItem('mypos', ${i})">❌</button></div>`).join('');
-        document.getElementById('checks-recap-soir').innerHTML = this.state.checks.map((v, i) => `<div class="list-item"><span>Chèque ${v}€</span><button onclick="app.removeItem('checks', ${i})">❌</button></div>`).join('');
-        document.getElementById('ancv-recap-soir').innerHTML = this.state.ancv.map((v, i) => `<div class="list-item"><span>${v.type} ${v.qty}x${v.val}€</span><button onclick="app.removeItem('ancv', ${i})">❌</button></div>`).join('');
+        
+        const myposRecap = document.getElementById('mypos-recap-soir');
+        if(myposRecap) myposRecap.innerHTML = this.state.mypos.map((v, i) => `<div class="list-item"><span>MyPos ${v}€</span><button onclick="app.removeItem('mypos', ${i})">❌</button></div>`).join('');
+        
+        const checksRecap = document.getElementById('checks-recap-soir');
+        if(checksRecap) checksRecap.innerHTML = this.state.checks.map((v, i) => `<div class="list-item"><span>Chèque ${v}€</span><button onclick="app.removeItem('checks', ${i})">❌</button></div>`).join('');
+        
+        const ancvRecap = document.getElementById('ancv-recap-soir');
+        if(ancvRecap) ancvRecap.innerHTML = this.state.ancv.map((v, i) => `<div class="list-item"><span>${v.type} ${v.qty}x${v.val}€</span><button onclick="app.removeItem('ancv', ${i})">❌</button></div>`).join('');
 
         this.saveToStorage();
     },
@@ -126,7 +127,6 @@ const app = {
             };
             exportData = { ...displayData };
         } else {
-            // COMPTAGE CLÔTURE (CUMUL JOURNÉE POUR COMPARER AU TICKET Z)
             displayData = {
                 service: 'Soir',
                 cb: v('cb-c-soir') + v('cb-sc-soir'),
@@ -143,7 +143,6 @@ const app = {
             displayData.deltaCash = parseFloat((displayData.cashNet - displayData.posCashLogiciel).toFixed(2));
 
             exportData = { ...displayData };
-            // Soustraction pour la Sheet si un Midi a été archivé
             if (this.state.midiData) {
                 const m = this.state.midiData;
                 ['cb', 'tr', 'mypos', 'cashNet', 'ancvP', 'ancvC', 'checks', 'tva5', 'tva10', 'tva20', 'posCashLogiciel'].forEach(k => {
@@ -160,12 +159,12 @@ const app = {
     renderFinalRecap(f) {
         const titleLabel = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CUMUL JOURNÉE (Z)';
         
-        // Fonction pour n'afficher que si > 0
+        // Fonction utilitaire pour masquer si 0
         const row = (label, val, suffix = "€") => {
             if (!val || val === 0 || val === "0.00") return "";
             return `<div class="recap-row"><span>${label}</span> <b>${val}${suffix}</b></div>`;
         };
-    
+
         let html = `
             <div class="recap-list-final">
                 <div class="recap-row"><span>Type</span> <b>${titleLabel}</b></div>
@@ -174,7 +173,6 @@ const app = {
                 ${row("Tickets Resto", f.tr.toFixed(2))}
                 ${row("ANCV (Cumul)", (f.ancvP + f.ancvC).toFixed(2))}
                 ${row("Chèques", f.checks.toFixed(2))}
-                
                 <hr>
                 ${row("Espèces Net", f.cashNet.toFixed(2))}
                 ${row("Espèces Adipos", f.posCashLogiciel.toFixed(2))}
@@ -182,25 +180,22 @@ const app = {
                 <div class="recap-row" style="background:${f.deltaCash < 0 ? '#fee2e2' : '#f0fdf4'}; padding:5px; border-radius:8px; margin-top:5px;">
                     <span>Écart / Logiciel</span> <b style="color:${f.deltaCash < 0 ? 'red' : 'green'}">${f.deltaCash.toFixed(2)}€</b>
                 </div>
-                ${row("Dont MyPos (Hors Z)", f.mypos.toFixed(2))}
-    
+                ${row("MyPos (Hors Z)", f.mypos.toFixed(2))}
                 <hr>
-                <div style="font-size:0.9rem; color:#475569; margin-top:10px;">
-                    <div class="recap-row"><span>🍕 Emporté</span> <b>${f.pizzas_e || 0}</b></div>
-                    <div class="recap-row"><span>🍽️ Sur Place</span> <b>${f.pizzas_p || 0}</b></div>
-                    <div style="margin-top:8px; border-top:1px dashed #cbd5e1; pt:5px;">
-                        ${row("TVA 5.5%", f.tva5.toFixed(2))}
-                        ${row("TVA 10%", f.tva10.toFixed(2))}
-                        ${row("TVA 20%", f.tva20.toFixed(2))}
-                    </div>
+                <div class="recap-row"><span>🍕 Emporté</span> <b>${f.pizzas_e || 0}</b></div>
+                <div class="recap-row"><span>🍽️ Sur Place</span> <b>${f.pizzas_p || 0}</b></div>
+                <div style="margin-top:8px; border-top:1px dashed #cbd5e1; padding-top:5px;">
+                    ${row("TVA 5.5%", f.tva5.toFixed(2))}
+                    ${row("TVA 10%", f.tva10.toFixed(2))}
+                    ${row("TVA 20%", f.tva20.toFixed(2))}
                 </div>
             </div>
             <button class="btn-primary" style="margin-top:15px" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
         `;
-    
+
         document.getElementById('recap-body').innerHTML = html;
         document.getElementById('modal-recap').classList.remove('hidden');
-    }
+    },
 
     send() {
         const btn = document.querySelector('#modal-recap .btn-primary');
@@ -215,7 +210,7 @@ const app = {
                 tva20: v('midi-tva20'), posCashLogiciel: v('midi-cash')
             };
         } else {
-            this.state.midiData = null; // Journée finie
+            this.state.midiData = null;
         }
 
         fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(this.lastExport) })
@@ -235,8 +230,8 @@ const app = {
     },
 
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v10', JSON.stringify(this.state)); },
-    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v10')); if(s) this.state = s; },
+    saveToStorage() { localStorage.setItem('vesuvio_v11', JSON.stringify(this.state)); },
+    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v11')); if(s) this.state = s; },
     bindEvents() { document.addEventListener('input', () => this.refreshUI()); }
 };
 document.addEventListener('DOMContentLoaded', () => app.init());
