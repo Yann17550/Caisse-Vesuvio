@@ -1,13 +1,17 @@
+/**
+ * APP LE VESUVIO - VERSION FINALE (V10)
+ * Gère le mode MIDI (Saisie rapide) et CLÔTURE (Comptage complet)
+ */
 const app = {
     state: {
         service: 'Midi',
         ancv: [],
         checks: [],
         mypos: [],
-        midiData: null // Stocke le premier service si on fait une journée double
+        midiData: null 
     },
     CONFIG: {
-        SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec",
+        SCRIPT_URL: "TON_URL_SCRIPT",
         CASH_OFFSET: 134.00
     },
 
@@ -122,7 +126,7 @@ const app = {
             };
             exportData = { ...displayData };
         } else {
-            // COMPTAGE SOIR (CUMUL JOURNÉE)
+            // COMPTAGE CLÔTURE (CUMUL JOURNÉE POUR COMPARER AU TICKET Z)
             displayData = {
                 service: 'Soir',
                 cb: v('cb-c-soir') + v('cb-sc-soir'),
@@ -139,7 +143,7 @@ const app = {
             displayData.deltaCash = parseFloat((displayData.cashNet - displayData.posCashLogiciel).toFixed(2));
 
             exportData = { ...displayData };
-            // On ne soustrait que si un service MIDI a été validé plus tôt dans la journée
+            // Soustraction pour la Sheet si un Midi a été archivé
             if (this.state.midiData) {
                 const m = this.state.midiData;
                 ['cb', 'tr', 'mypos', 'cashNet', 'ancvP', 'ancvC', 'checks', 'tva5', 'tva10', 'tva20', 'posCashLogiciel'].forEach(k => {
@@ -154,24 +158,24 @@ const app = {
     },
 
     renderFinalRecap(f) {
-        const titleLabel = (f.service === 'Midi') ? 'CLÔTURE MIDI' : 'CUMUL JOURNÉE (SOIR)';
+        const titleLabel = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CUMUL JOURNÉE (Z)';
         document.getElementById('recap-body').innerHTML = `
             <div class="recap-list-final">
-                <div class="recap-row"><span>Service</span> <b>${titleLabel}</b></div>
-                <div class="recap-row"><span>Pizzas</span> <b>${f.pizzas_e} E / ${f.pizzas_p} P</b></div>
+                <div class="recap-row"><span>Type</span> <b>${titleLabel}</b></div>
                 <hr>
-                <div class="recap-row"><span>CB</span> <b>${f.cb.toFixed(2)}€</b></div>
-                <div class="recap-row"><span>TR</span> <b>${f.tr.toFixed(2)}€</b></div>
-                <div class="recap-row"><span>ANCV</span> <b>${(f.ancvP + f.ancvC).toFixed(2)}€</b></div>
+                <div class="recap-row"><span>Cartes Bancaires</span> <b>${f.cb.toFixed(2)}€</b></div>
+                <div class="recap-row"><span>Tickets Resto</span> <b>${f.tr.toFixed(2)}€</b></div>
+                <div class="recap-row"><span>ANCV (Cumul)</span> <b>${(f.ancvP + f.ancvC).toFixed(2)}€</b></div>
                 <div class="recap-row"><span>MyPos</span> <b>${f.mypos.toFixed(2)}€</b></div>
                 <div class="recap-row"><span>Chèques</span> <b>${f.checks.toFixed(2)}€</b></div>
                 <hr>
                 <div class="recap-row"><span>Espèces Net</span> <b>${f.cashNet.toFixed(2)}€</b></div>
-                <div class="recap-row" style="background:${f.deltaCash < 0 ? '#fee2e2' : '#f0fdf4'}; padding:5px; border-radius:5px;">
+                <div class="recap-row" style="background:${f.deltaCash < 0 ? '#fee2e2' : '#f0fdf4'}; padding:5px; border-radius:8px;">
                     <span>Écart / Logiciel</span> <b style="color:${f.deltaCash < 0 ? 'red' : 'green'}">${f.deltaCash.toFixed(2)}€</b>
                 </div>
                 <hr>
-                <div class="recap-row" style="font-size:0.85rem"><span>TVA 5.5/10/20</span> <b>${f.tva5}/${f.tva10}/${f.tva20}</b></div>
+                <div class="recap-row" style="font-size:0.85rem"><span>Pizzas</span> <b>${f.pizzas_e} E / ${f.pizzas_p} P</b></div>
+                <div class="recap-row" style="font-size:0.85rem"><span>TVA (5/10/20)</span> <b>${f.tva5}/${f.tva10}/${f.tva20}</b></div>
             </div>
             <button class="btn-primary" style="margin-top:15px" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
         `;
@@ -182,7 +186,6 @@ const app = {
         const btn = document.querySelector('#modal-recap .btn-primary');
         btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
 
-        // Avant d'envoyer, on stocke la valeur de saisie brute pour le futur calcul du soir
         if (this.state.service === 'Midi') {
             const v = id => parseFloat(document.getElementById(id).value) || 0;
             this.state.midiData = {
@@ -192,19 +195,17 @@ const app = {
                 tva20: v('midi-tva20'), posCashLogiciel: v('midi-cash')
             };
         } else {
-            // Si on archive le soir, on vide la mémoire pour le lendemain
-            this.state.midiData = null;
+            this.state.midiData = null; // Journée finie
         }
 
         fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(this.lastExport) })
         .then(() => {
-            alert("✅ Données envoyées !");
+            alert("✅ Données archivées !");
             this.resetForm();
             this.closeRecap();
-            // Si on vient de faire le Midi, on bascule direct sur le Soir pour être prêt
             if (this.state.service === 'Midi') this.setService('Soir');
         })
-        .catch(() => { alert("Erreur de transmission"); btn.disabled = false; });
+        .catch(() => { alert("Erreur d'envoi"); btn.disabled = false; });
     },
 
     resetForm() {
@@ -214,8 +215,8 @@ const app = {
     },
 
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v9', JSON.stringify(this.state)); },
-    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v9')); if(s) this.state = s; },
+    saveToStorage() { localStorage.setItem('vesuvio_v10', JSON.stringify(this.state)); },
+    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v10')); if(s) this.state = s; },
     bindEvents() { document.addEventListener('input', () => this.refreshUI()); }
 };
 document.addEventListener('DOMContentLoaded', () => app.init());
