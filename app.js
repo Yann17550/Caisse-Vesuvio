@@ -4,16 +4,20 @@ const app = {
         ancv: [],
         checks: [],
         mypos: [],
+        fondCaisse: 134.00,
         midiData: null 
     },
     CONFIG: {
-        SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec", // À METTRE À JOUR
-        CASH_OFFSET: 134.00
+        SCRIPT_URL: "TON_URL_SCRIPT" // Remplace par ton URL Google Apps Script
     },
 
     init() {
         this.renderCashGrid();
         this.loadFromStorage();
+        // Mise à jour de l'input Fond de Caisse avec la valeur stockée
+        const fondInput = document.getElementById('fond-caisse-input');
+        if (fondInput) fondInput.value = this.state.fondCaisse;
+        
         this.setService(this.state.service);
         this.bindEvents();
         this.refreshUI();
@@ -91,22 +95,35 @@ const app = {
     },
 
     refreshUI() {
+        // MAJ Fond de Caisse
+        const fondInput = document.getElementById('fond-caisse-input');
+        if (fondInput) this.state.fondCaisse = parseFloat(fondInput.value) || 0;
+
+        // Calcul Espèces
         let brut = 0;
         document.querySelectorAll('.cash-in').forEach(i => {
             brut += (parseFloat(i.dataset.unit) * (parseInt(i.value) || 0));
         });
-        document.getElementById('cash-brut-soir').textContent = brut.toFixed(2);
         
-        const myposRecap = document.getElementById('mypos-recap-soir');
-        if(myposRecap) myposRecap.innerHTML = this.state.mypos.map((v, i) => `<div class="list-item"><span>MyPos ${v}€</span><button onclick="app.removeItem('mypos', ${i})">❌</button></div>`).join('');
-        
-        const checksRecap = document.getElementById('checks-recap-soir');
-        if(checksRecap) checksRecap.innerHTML = this.state.checks.map((v, i) => `<div class="list-item"><span>Chèque ${v}€</span><button onclick="app.removeItem('checks', ${i})">❌</button></div>`).join('');
-        
-        const ancvRecap = document.getElementById('ancv-recap-soir');
-        if(ancvRecap) ancvRecap.innerHTML = this.state.ancv.map((v, i) => `<div class="list-item"><span>${v.type} ${v.qty}x${v.val}€</span><button onclick="app.removeItem('ancv', ${i})">❌</button></div>`).join('');
+        const net = brut - this.state.fondCaisse;
+        const netDisplay = document.getElementById('cash-net-display');
+        if (netDisplay) netDisplay.textContent = net.toFixed(2);
+
+        // MAJ Listes visuelles
+        this.updateList('mypos-recap-soir', this.state.mypos, 'mypos');
+        this.updateList('checks-recap-soir', this.state.checks, 'checks');
+        this.updateList('ancv-recap-soir', this.state.ancv, 'ancv', true);
 
         this.saveToStorage();
+    },
+
+    updateList(id, data, typeKey, isAncv = false) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = data.map((v, i) => {
+            const txt = isAncv ? `${v.type} ${v.qty}x${v.val}€` : `${typeKey.toUpperCase()} ${v}€`;
+            return `<div class="list-item"><span>${txt}</span><button onclick="app.removeItem('${typeKey}', ${i})">❌</button></div>`;
+        }).join('');
     },
 
     openRecap() {
@@ -132,7 +149,7 @@ const app = {
                 cb: v('cb-c-soir') + v('cb-sc-soir'),
                 tr: v('tr-c-soir') + v('tr-sc-soir'),
                 mypos: this.state.mypos.reduce((a, b) => a + b, 0),
-                cashNet: txt('cash-brut-soir') - this.CONFIG.CASH_OFFSET,
+                cashNet: txt('cash-net-display'),
                 ancvP: this.state.ancv.filter(i => i.type === 'Papier').reduce((a, b) => a + (b.val * b.qty), 0),
                 ancvC: this.state.ancv.filter(i => i.type === 'Connect').reduce((a, b) => a + (b.val * b.qty), 0),
                 checks: this.state.checks.reduce((a, b) => a + b, 0),
@@ -151,15 +168,12 @@ const app = {
                 exportData.deltaCash = parseFloat((exportData.cashNet - exportData.posCashLogiciel).toFixed(2));
             }
         }
-
         this.lastExport = exportData;
         this.renderFinalRecap(displayData);
     },
 
     renderFinalRecap(f) {
         const titleLabel = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CUMUL JOURNÉE (Z)';
-        
-        // Fonction utilitaire pour masquer si 0
         const row = (label, val, suffix = "€") => {
             if (!val || val === 0 || val === "0.00") return "";
             return `<div class="recap-row"><span>${label}</span> <b>${val}${suffix}</b></div>`;
@@ -230,8 +244,14 @@ const app = {
     },
 
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v11', JSON.stringify(this.state)); },
-    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v11')); if(s) this.state = s; },
+    saveToStorage() { localStorage.setItem('vesuvio_v13', JSON.stringify(this.state)); },
+    loadFromStorage() { 
+        const s = JSON.parse(localStorage.getItem('vesuvio_v13')); 
+        if(s) {
+            this.state = s;
+            if (this.state.fondCaisse === undefined) this.state.fondCaisse = 134.00;
+        }
+    },
     bindEvents() { document.addEventListener('input', () => this.refreshUI()); }
 };
 document.addEventListener('DOMContentLoaded', () => app.init());
