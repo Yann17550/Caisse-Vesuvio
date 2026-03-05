@@ -50,7 +50,7 @@
                 </div>
                 <div class="card-section">
                     <h2>MyPos</h2>
-                    <input type="number" id="mypos-amt-soir" inputmode="decimal" placeholder="Montant">
+                    <input type="number" id="mypos-amt-soir" inputmode="decimal" placeholder="Montant MyPos">
                     <button class="btn-primary" onclick="app.addItem('mypos')">Ajouter</button>
                     <div id="mypos-recap-soir" class="recap-mini"></div>
                 </div>
@@ -59,8 +59,21 @@
             <section id="view-cash-soir" class="view hidden">
                 <h1>💰 Espèces</h1>
                 <div class="card-section">
-                    <div class="total-display highlight">Total : <span id="cash-brut-soir">0.00</span> €</div>
+                    <div class="input-group" style="margin-bottom:15px; background:#f1f5f9; padding:10px; border-radius:8px;">
+                        <label>Fond de Caisse (€)</label>
+                        <input type="number" id="fond-caisse-input" step="0.01" oninput="app.refreshUI()">
+                    </div>
+                    <div class="total-display highlight">Net (Brut - Fond) : <span id="cash-net-display">0.00</span> €</div>
                     <div class="cash-grid" id="cash-container"></div>
+                </div>
+            </section>
+
+            <section id="view-checks-soir" class="view hidden">
+                <h1>✍️ Chèques</h1>
+                <div class="card-section">
+                    <input type="number" id="check-amt-soir" inputmode="decimal" placeholder="Montant du chèque">
+                    <button class="btn-primary" onclick="app.addItem('checks')">Ajouter le chèque</button>
+                    <div id="checks-recap-soir" class="recap-mini"></div>
                 </div>
             </section>
 
@@ -83,21 +96,14 @@
             </section>
 
             <section id="view-pos-soir" class="view hidden">
-                <h1>🖥️ Logiciel & Chèques</h1>
+                <h1>🖥️ Logiciel Adipos</h1>
                 <div class="card-section">
-                    <h2>Chèques Papier</h2>
-                    <input type="number" id="check-amt-soir" inputmode="decimal" placeholder="Montant">
-                    <button class="btn-primary" onclick="app.addItem('checks')">Ajouter Chèque</button>
-                    <div id="checks-recap-soir" class="recap-mini"></div>
+                    <div class="input-group"><label>Espèces Logiciel (Z)</label><input type="number" id="pos-cash-soir" inputmode="decimal"></div>
+                    <div class="input-group"><label>Pizzas Emportées</label><input type="number" id="pos-piz-e-soir" inputmode="numeric"></div>
+                    <div class="input-group"><label>Couverts (Place)</label><input type="number" id="pos-piz-p-soir" inputmode="numeric"></div>
                 </div>
                 <div class="card-section">
-                    <h2>Données Adipos</h2>
-                    <div class="input-group"><label>Espèces Logiciel</label><input type="number" id="pos-cash-soir" inputmode="decimal"></div>
-                    <div class="input-group"><label>Pizzas E</label><input type="number" id="pos-piz-e-soir" inputmode="numeric"></div>
-                    <div class="input-group"><label>Pizzas P</label><input type="number" id="pos-piz-p-soir" inputmode="numeric"></div>
-                </div>
-                <div class="card-section">
-                    <h2>TVA TTC</h2>
+                    <h2>TVA du Ticket Z</h2>
                     <div class="input-group"><label>TTC 5.5%</label><input type="number" id="tva5-soir" inputmode="decimal"></div>
                     <div class="input-group"><label>TTC 10%</label><input type="number" id="tva10-soir" inputmode="decimal"></div>
                     <div class="input-group"><label>TTC 20%</label><input type="number" id="tva20-soir" inputmode="decimal"></div>
@@ -117,6 +123,7 @@
             <button id="nav-midi-btn" onclick="app.setService('Midi')">☀️ Saisie</button>
             <button id="nav-cb-btn" onclick="app.showView('view-cards-soir')" class="soir-only hidden">💳 CB</button>
             <button id="nav-cash-btn" onclick="app.showView('view-cash-soir')" class="soir-only hidden">💰 Esp.</button>
+            <button id="nav-checks-btn" onclick="app.showView('view-checks-soir')" class="soir-only hidden">✍️ Chq</button>
             <button id="nav-ancv-btn" onclick="app.showView('view-ancv-soir')" class="soir-only hidden">🏖️ ANCV</button>
             <button id="nav-pos-btn" onclick="app.showView('view-pos-soir')" class="soir-only hidden">🖥️ Logiciel</button>
             <button class="btn-recap-nav" onclick="app.openRecap()">📋 RÉCAP</button>
