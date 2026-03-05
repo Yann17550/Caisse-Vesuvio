@@ -159,28 +159,48 @@ const app = {
 
     renderFinalRecap(f) {
         const titleLabel = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CUMUL JOURNÉE (Z)';
-        document.getElementById('recap-body').innerHTML = `
+        
+        // Fonction pour n'afficher que si > 0
+        const row = (label, val, suffix = "€") => {
+            if (!val || val === 0 || val === "0.00") return "";
+            return `<div class="recap-row"><span>${label}</span> <b>${val}${suffix}</b></div>`;
+        };
+    
+        let html = `
             <div class="recap-list-final">
                 <div class="recap-row"><span>Type</span> <b>${titleLabel}</b></div>
                 <hr>
-                <div class="recap-row"><span>Cartes Bancaires</span> <b>${f.cb.toFixed(2)}€</b></div>
-                <div class="recap-row"><span>Tickets Resto</span> <b>${f.tr.toFixed(2)}€</b></div>
-                <div class="recap-row"><span>ANCV (Cumul)</span> <b>${(f.ancvP + f.ancvC).toFixed(2)}€</b></div>
-                <div class="recap-row"><span>MyPos</span> <b>${f.mypos.toFixed(2)}€</b></div>
-                <div class="recap-row"><span>Chèques</span> <b>${f.checks.toFixed(2)}€</b></div>
+                ${row("Cartes Bancaires", f.cb.toFixed(2))}
+                ${row("Tickets Resto", f.tr.toFixed(2))}
+                ${row("ANCV (Cumul)", (f.ancvP + f.ancvC).toFixed(2))}
+                ${row("Chèques", f.checks.toFixed(2))}
+                
                 <hr>
-                <div class="recap-row"><span>Espèces Net</span> <b>${f.cashNet.toFixed(2)}€</b></div>
-                <div class="recap-row" style="background:${f.deltaCash < 0 ? '#fee2e2' : '#f0fdf4'}; padding:5px; border-radius:8px;">
+                ${row("Espèces Net", f.cashNet.toFixed(2))}
+                ${row("Espèces Adipos", f.posCashLogiciel.toFixed(2))}
+                
+                <div class="recap-row" style="background:${f.deltaCash < 0 ? '#fee2e2' : '#f0fdf4'}; padding:5px; border-radius:8px; margin-top:5px;">
                     <span>Écart / Logiciel</span> <b style="color:${f.deltaCash < 0 ? 'red' : 'green'}">${f.deltaCash.toFixed(2)}€</b>
                 </div>
+                ${row("Dont MyPos (Hors Z)", f.mypos.toFixed(2))}
+    
                 <hr>
-                <div class="recap-row" style="font-size:0.85rem"><span>Pizzas</span> <b>${f.pizzas_e} E / ${f.pizzas_p} P</b></div>
-                <div class="recap-row" style="font-size:0.85rem"><span>TVA (5/10/20)</span> <b>${f.tva5}/${f.tva10}/${f.tva20}</b></div>
+                <div style="font-size:0.9rem; color:#475569; margin-top:10px;">
+                    <div class="recap-row"><span>🍕 Emporté</span> <b>${f.pizzas_e || 0}</b></div>
+                    <div class="recap-row"><span>🍽️ Sur Place</span> <b>${f.pizzas_p || 0}</b></div>
+                    <div style="margin-top:8px; border-top:1px dashed #cbd5e1; pt:5px;">
+                        ${row("TVA 5.5%", f.tva5.toFixed(2))}
+                        ${row("TVA 10%", f.tva10.toFixed(2))}
+                        ${row("TVA 20%", f.tva20.toFixed(2))}
+                    </div>
+                </div>
             </div>
             <button class="btn-primary" style="margin-top:15px" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
         `;
+    
+        document.getElementById('recap-body').innerHTML = html;
         document.getElementById('modal-recap').classList.remove('hidden');
-    },
+    }
 
     send() {
         const btn = document.querySelector('#modal-recap .btn-primary');
