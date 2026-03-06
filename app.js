@@ -1,23 +1,17 @@
 const app = {
     state: {
         service: 'Midi',
-        ancv: [],
-        checks: [],
-        mypos: [],
+        ancv: [], checks: [], mypos: [],
         fondCaisse: 134.00,
         midiData: null 
     },
-    CONFIG: {
-        SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec" // Remplace par ton URL Google Apps Script
-    },
+    CONFIG: { SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec" },
 
     init() {
         this.renderCashGrid();
         this.loadFromStorage();
-        // Mise à jour de l'input Fond de Caisse avec la valeur stockée
-        const fondInput = document.getElementById('fond-caisse-input');
-        if (fondInput) fondInput.value = this.state.fondCaisse;
-        
+        if(document.getElementById('fond-caisse-input')) 
+            document.getElementById('fond-caisse-input').value = this.state.fondCaisse;
         this.setService(this.state.service);
         this.bindEvents();
         this.refreshUI();
@@ -25,32 +19,24 @@ const app = {
 
     setService(mode) {
         this.state.service = mode;
-        this.updateTheme();
+        document.body.className = (mode === 'Midi') ? 'theme-midi' : 'theme-soir';
+        document.getElementById('btn-midi').className = (mode === 'Midi') ? 'active-midi' : '';
+        document.getElementById('btn-soir').className = (mode === 'Soir') ? 'active-soir' : '';
         
-        const midiView = document.getElementById('view-midi-fast');
-        const soirViews = document.getElementById('views-soir-container');
         const soirBtns = document.querySelectorAll('.soir-only');
-        const midiBtn = document.getElementById('nav-midi-btn');
-
         if (mode === 'Midi') {
-            midiView.classList.remove('hidden');
-            soirViews.classList.add('hidden');
+            document.getElementById('view-midi-fast').classList.remove('hidden');
+            document.getElementById('views-soir-container').classList.add('hidden');
             soirBtns.forEach(b => b.classList.add('hidden'));
-            midiBtn.classList.remove('hidden');
+            document.getElementById('nav-midi-btn').classList.remove('hidden');
         } else {
-            midiView.classList.add('hidden');
-            soirViews.classList.remove('hidden');
+            document.getElementById('view-midi-fast').classList.add('hidden');
+            document.getElementById('views-soir-container').classList.remove('hidden');
             soirBtns.forEach(b => b.classList.remove('hidden'));
-            midiBtn.classList.add('hidden');
+            document.getElementById('nav-midi-btn').classList.add('hidden');
             this.showView('view-cards-soir');
         }
         this.saveToStorage();
-    },
-
-    updateTheme() {
-        document.body.className = (this.state.service === 'Midi') ? 'theme-midi' : 'theme-soir';
-        document.getElementById('btn-midi').className = (this.state.service === 'Midi') ? 'active-midi' : '';
-        document.getElementById('btn-soir').className = (this.state.service === 'Soir') ? 'active-soir' : '';
     },
 
     showView(id) {
@@ -61,95 +47,75 @@ const app = {
 
     renderCashGrid() {
         const units = [100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1];
-        const container = document.getElementById('cash-container');
-        container.innerHTML = units.map(u => `
-            <div class="cash-item">
-                <label>${u} €</label>
-                <input type="number" data-unit="${u}" class="cash-in" inputmode="numeric">
-            </div>
+        document.getElementById('cash-container').innerHTML = units.map(u => `
+            <div class="cash-item"><label>${u}€</label><input type="number" data-unit="${u}" class="cash-in" inputmode="numeric"></div>
         `).join('');
     },
 
     addItem(type) {
         if (type === 'mypos') {
-            const val = parseFloat(document.getElementById('mypos-amt-soir').value) || 0;
-            if (val > 0) this.state.mypos.push(val);
+            const v = parseFloat(document.getElementById('mypos-amt-soir').value);
+            if (v > 0) this.state.mypos.push(v);
             document.getElementById('mypos-amt-soir').value = '';
         } else if (type === 'checks') {
-            const val = parseFloat(document.getElementById('check-amt-soir').value) || 0;
-            if (val > 0) this.state.checks.push(val);
+            const v = parseFloat(document.getElementById('check-amt-soir').value);
+            if (v > 0) this.state.checks.push(v);
             document.getElementById('check-amt-soir').value = '';
         } else if (type === 'ancv') {
-            const val = parseFloat(document.getElementById('ancv-val-soir').value);
-            const qty = parseInt(document.getElementById('ancv-qty-soir').value) || 0;
+            const q = parseInt(document.getElementById('ancv-qty-soir').value);
+            const v = parseFloat(document.getElementById('ancv-val-soir').value);
             const t = document.querySelector('input[name="ancv-t"]:checked').value;
-            if (qty > 0) this.state.ancv.push({ val, qty, type: t });
+            if (q > 0 && v > 0) this.state.ancv.push({ val: v, qty: q, type: t });
             document.getElementById('ancv-qty-soir').value = '';
         }
         this.refreshUI();
     },
 
-    removeItem(type, idx) {
-        this.state[type].splice(idx, 1);
-        this.refreshUI();
-    },
+    removeItem(t, i) { this.state[t].splice(i, 1); this.refreshUI(); },
 
     refreshUI() {
-        // MAJ Fond de Caisse
-        const fondInput = document.getElementById('fond-caisse-input');
-        if (fondInput) this.state.fondCaisse = parseFloat(fondInput.value) || 0;
+        const fInput = document.getElementById('fond-caisse-input');
+        if (fInput) this.state.fondCaisse = parseFloat(fInput.value) || 0;
 
-        // Calcul Espèces
         let brut = 0;
-        document.querySelectorAll('.cash-in').forEach(i => {
-            brut += (parseFloat(i.dataset.unit) * (parseInt(i.value) || 0));
-        });
-        
+        document.querySelectorAll('.cash-in').forEach(i => brut += (parseFloat(i.dataset.unit) * (parseInt(i.value) || 0)));
         const net = brut - this.state.fondCaisse;
-        const netDisplay = document.getElementById('cash-net-display');
-        if (netDisplay) netDisplay.textContent = net.toFixed(2);
+        if(document.getElementById('cash-net-display')) document.getElementById('cash-net-display').textContent = net.toFixed(2);
 
-        // MAJ Listes visuelles
-        this.updateList('mypos-recap-soir', this.state.mypos, 'mypos');
-        this.updateList('checks-recap-soir', this.state.checks, 'checks');
-        this.updateList('ancv-recap-soir', this.state.ancv, 'ancv', true);
-
+        this.updateList('mypos-recap-soir', this.state.mypos, 'MYPOS');
+        this.updateList('checks-recap-soir', this.state.checks, 'CHÈQUE');
+        this.updateList('ancv-recap-soir', this.state.ancv, 'ANCV', true);
         this.saveToStorage();
     },
 
-    updateList(id, data, typeKey, isAncv = false) {
+    updateList(id, data, label, isAncv = false) {
         const el = document.getElementById(id);
         if (!el) return;
         el.innerHTML = data.map((v, i) => {
-            const txt = isAncv ? `${v.type} ${v.qty}x${v.val}€` : `${typeKey.toUpperCase()} ${v}€`;
-            return `<div class="list-item"><span>${txt}</span><button onclick="app.removeItem('${typeKey}', ${i})">❌</button></div>`;
+            const txt = isAncv ? `${v.type} ${v.qty}x${v.val}€` : `${label} ${v}€`;
+            const key = isAncv ? 'ancv' : (label === 'MYPOS' ? 'mypos' : 'checks');
+            return `<div class="list-item"><span>${txt}</span><button onclick="app.removeItem('${key}', ${i})">❌</button></div>`;
         }).join('');
     },
 
     openRecap() {
-        const v = id => parseFloat(document.getElementById(id).value) || 0;
-        const txt = id => parseFloat(document.getElementById(id).textContent) || 0;
+        const v = id => parseFloat(document.getElementById(id)?.value) || 0;
+        const netVal = parseFloat(document.getElementById('cash-net-display')?.textContent) || 0;
         
-        let displayData = {}; 
-        let exportData = {};  
-
+        let f = {};
         if (this.state.service === 'Midi') {
-            displayData = {
-                service: 'Midi',
-                cb: v('midi-cb'), tr: v('midi-tr'), mypos: v('midi-mypos'),
+            f = {
+                service: 'Midi', cb: v('midi-cb'), tr: v('midi-tr'), mypos: v('midi-mypos'),
                 cashNet: v('midi-cash'), ancvP: v('midi-ancv'), ancvC: 0,
                 checks: v('midi-checks'), pizzas_e: v('midi-piz-e'), pizzas_p: v('midi-piz-p'),
                 tva5: v('midi-tva5'), tva10: v('midi-tva10'), tva20: v('midi-tva20'),
                 posCashLogiciel: v('midi-cash'), deltaCash: 0
             };
-            exportData = { ...displayData };
         } else {
-            displayData = {
-                service: 'Soir',
-                cb: v('cb-c-soir') + v('cb-sc-soir'),
-                tr: v('tr-c-soir') + v('tr-sc-soir'),
+            f = {
+                service: 'Soir', cb: v('cb-total-soir'), tr: v('tr-total-soir'),
                 mypos: this.state.mypos.reduce((a, b) => a + b, 0),
-                cashNet: txt('cash-net-display'),
+                cashNet: netVal,
                 ancvP: this.state.ancv.filter(i => i.type === 'Papier').reduce((a, b) => a + (b.val * b.qty), 0),
                 ancvC: this.state.ancv.filter(i => i.type === 'Connect').reduce((a, b) => a + (b.val * b.qty), 0),
                 checks: this.state.checks.reduce((a, b) => a + b, 0),
@@ -157,84 +123,46 @@ const app = {
                 tva5: v('tva5-soir'), tva10: v('tva10-soir'), tva20: v('tva20-soir'),
                 posCashLogiciel: v('pos-cash-soir')
             };
-            displayData.deltaCash = parseFloat((displayData.cashNet - displayData.posCashLogiciel).toFixed(2));
-
-            exportData = { ...displayData };
-            if (this.state.midiData) {
-                const m = this.state.midiData;
-                ['cb', 'tr', 'mypos', 'cashNet', 'ancvP', 'ancvC', 'checks', 'tva5', 'tva10', 'tva20', 'posCashLogiciel'].forEach(k => {
-                    exportData[k] = parseFloat((displayData[k] - (m[k] || 0)).toFixed(2));
-                });
-                exportData.deltaCash = parseFloat((exportData.cashNet - exportData.posCashLogiciel).toFixed(2));
-            }
+            f.deltaCash = parseFloat((f.cashNet - f.posCashLogiciel).toFixed(2));
         }
-        this.lastExport = exportData;
-        this.renderFinalRecap(displayData);
+        this.lastExport = f;
+        this.renderFinalRecap(f);
     },
 
     renderFinalRecap(f) {
-        const titleLabel = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CUMUL JOURNÉE (Z)';
-        const row = (label, val, suffix = "€") => {
-            if (!val || val === 0 || val === "0.00") return "";
-            return `<div class="recap-row"><span>${label}</span> <b>${val}${suffix}</b></div>`;
-        };
+        const title = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CLÔTURE';
+        const caCaisse = (f.cb||0)+(f.tr||0)+(f.ancvP||0)+(f.ancvC||0)+(f.checks||0)+(f.posCashLogiciel||0);
+        const row = (l, v) => (v && v !== 0) ? `<div class="recap-row"><span>${l}</span><b>${v.toFixed(2)}€</b></div>` : '';
 
         let html = `
             <div class="recap-list-final">
-                <div class="recap-row"><span>Type</span> <b>${titleLabel}</b></div>
-                <hr>
-                ${row("Cartes Bancaires", f.cb.toFixed(2))}
-                ${row("Tickets Resto", f.tr.toFixed(2))}
-                ${row("ANCV (Cumul)", (f.ancvP + f.ancvC).toFixed(2))}
-                ${row("Chèques", f.checks.toFixed(2))}
-                <hr>
-                ${row("Espèces Net", f.cashNet.toFixed(2))}
-                ${row("Espèces Adipos", f.posCashLogiciel.toFixed(2))}
-                
-                <div class="recap-row" style="background:${f.deltaCash < 0 ? '#fee2e2' : '#f0fdf4'}; padding:5px; border-radius:8px; margin-top:5px;">
-                    <span>Écart / Logiciel</span> <b style="color:${f.deltaCash < 0 ? 'red' : 'green'}">${f.deltaCash.toFixed(2)}€</b>
+                <div class="recap-row" style="font-size:1.1rem; border-bottom:2px solid #334155; padding-bottom:5px; margin-bottom:10px;">
+                    <span><b>${title}</b></span><span>CA Caisse: <b>${caCaisse.toFixed(2)}€</b></span>
                 </div>
-                ${row("MyPos (Hors Z)", f.mypos.toFixed(2))}
+                ${row("CB", f.cb)} ${row("CB TR", f.tr)} ${row("Espèces Adipos", f.posCashLogiciel)}
+                ${row("ANCV Papier", f.ancvP)} ${row("ANCV Connect", f.ancvC)} ${row("Chèque", f.checks)}
                 <hr>
-                <div class="recap-row"><span>🍕 Emporté</span> <b>${f.pizzas_e || 0}</b></div>
-                <div class="recap-row"><span>🍽️ Sur Place</span> <b>${f.pizzas_p || 0}</b></div>
-                <div style="margin-top:8px; border-top:1px dashed #cbd5e1; padding-top:5px;">
-                    ${row("TVA 5.5%", f.tva5.toFixed(2))}
-                    ${row("TVA 10%", f.tva10.toFixed(2))}
-                    ${row("TVA 20%", f.tva20.toFixed(2))}
+                <div style="background:${f.deltaCash < 0 ? '#fee2e2' : '#f0fdf4'}; padding:10px; border-radius:8px; border:1px solid ${f.deltaCash < 0 ? '#ef4444' : '#22c55e'};">
+                    <div class="recap-row"><span>Écart Espèces</span><b style="color:${f.deltaCash < 0 ? '#dc2626' : '#16a34a'}">${f.deltaCash.toFixed(2)}€</b></div>
+                    ${row("MyPos", f.mypos)}
                 </div>
+                <hr>
+                <div class="recap-row"><span>🍕 Emporté</span><b>${f.pizzas_e || 0}</b></div>
+                <div class="recap-row"><span>🍽️ Couvert</span><b>${f.pizzas_p || 0}</b></div>
+                <hr>
+                ${row("TVA 5.5", f.tva5)} ${row("TVA 10", f.tva10)} ${row("TVA 20", f.tva20)}
             </div>
-            <button class="btn-primary" style="margin-top:15px" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
-        `;
-
+            <button class="btn-primary" style="margin-top:20px; width:100%;" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>`;
         document.getElementById('recap-body').innerHTML = html;
         document.getElementById('modal-recap').classList.remove('hidden');
     },
 
     send() {
         const btn = document.querySelector('#modal-recap .btn-primary');
-        btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
-
-        if (this.state.service === 'Midi') {
-            const v = id => parseFloat(document.getElementById(id).value) || 0;
-            this.state.midiData = {
-                cb: v('midi-cb'), tr: v('midi-tr'), mypos: v('midi-mypos'),
-                cashNet: v('midi-cash'), ancvP: v('midi-ancv'), ancvC: 0,
-                checks: v('midi-checks'), tva5: v('midi-tva5'), tva10: v('midi-tva10'), 
-                tva20: v('midi-tva20'), posCashLogiciel: v('midi-cash')
-            };
-        } else {
-            this.state.midiData = null;
-        }
-
+        btn.disabled = true; btn.innerHTML = "⌛...";
         fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(this.lastExport) })
-        .then(() => {
-            alert("✅ Données archivées !");
-            this.resetForm();
-            this.closeRecap();
-            if (this.state.service === 'Midi') this.setService('Soir');
-        })
-        .catch(() => { alert("Erreur d'envoi"); btn.disabled = false; });
+        .then(() => { alert("✅ OK"); this.resetForm(); this.closeRecap(); if(this.state.service==='Midi') this.setService('Soir'); })
+        .catch(() => { alert("Erreur"); btn.disabled = false; });
     },
 
     resetForm() {
@@ -242,16 +170,9 @@ const app = {
         document.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
         this.refreshUI();
     },
-
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v13', JSON.stringify(this.state)); },
-    loadFromStorage() { 
-        const s = JSON.parse(localStorage.getItem('vesuvio_v13')); 
-        if(s) {
-            this.state = s;
-            if (this.state.fondCaisse === undefined) this.state.fondCaisse = 134.00;
-        }
-    },
+    saveToStorage() { localStorage.setItem('vesuvio_v15', JSON.stringify(this.state)); },
+    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v15')); if(s) this.state = s; },
     bindEvents() { document.addEventListener('input', () => this.refreshUI()); }
 };
 document.addEventListener('DOMContentLoaded', () => app.init());
