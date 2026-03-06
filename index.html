@@ -78,12 +78,28 @@
                 <h1>🏖️ ANCV</h1>
                 <div class="card-section">
                     <div class="type-selector">
-                        <input type="radio" id="type-p" name="ancv-t" value="Papier" checked><label for="type-p">Papier</label>
-                        <input type="radio" id="type-c" name="ancv-t" value="Connect"><label for="type-c">Connect</label>
+                        <input type="radio" id="type-p" name="ancv-t" value="Papier" checked onclick="app.toggleAncvInput()"><label for="type-p">Papier</label>
+                        <input type="radio" id="type-c" name="ancv-t" value="Connect" onclick="app.toggleAncvInput()"><label for="type-c">Connect</label>
                     </div>
-                    <input type="number" id="ancv-qty-soir" placeholder="Nombre" inputmode="numeric">
-                    <input type="number" id="ancv-val-soir" placeholder="Valeur" inputmode="numeric">
-                    <button class="btn-primary" onclick="app.addItem('ancv')">Ajouter</button>
+                    
+                    <div class="input-group-list">
+                        <label>Nombre de chèques</label>
+                        <input type="number" id="ancv-qty-soir" placeholder="Qté" inputmode="numeric">
+                    </div>
+            
+                    <div id="ancv-values-papier" style="margin-top:15px;">
+                        <div class="type-selector">
+                            <input type="radio" id="val-10" name="ancv-v-fixe" value="10" checked><label for="val-10">10€</label>
+                            <input type="radio" id="val-25" name="ancv-v-fixe" value="25"><label for="val-25">25€</label>
+                            <input type="radio" id="val-50" name="ancv-v-fixe" value="50"><label for="val-50">50€</label>
+                        </div>
+                    </div>
+            
+                    <div id="ancv-values-connect" class="hidden" style="margin-top:15px;">
+                        <input type="number" id="ancv-val-soir" placeholder="Montant libre €" inputmode="decimal" style="width: 100%;">
+                    </div>
+            
+                    <button class="btn-primary" style="margin-top:15px;" onclick="app.addItem('ancv')">Ajouter</button>
                 </div>
                 <div id="ancv-recap-soir" class="recap-mini"></div>
             </section>
