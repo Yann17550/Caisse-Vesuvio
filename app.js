@@ -5,7 +5,7 @@ const app = {
         fondCaisse: 134.00,
         midiData: null 
     },
-    CONFIG: { SCRIPT_URL: "TON_URL_SChttps://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/execRIPT" },
+    CONFIG: { SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec" },
 
     init() {
         this.renderCashGrid();
