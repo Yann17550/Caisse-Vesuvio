@@ -1,4 +1,3 @@
-
 const app = {
     state: {
         service: 'Midi',
@@ -49,7 +48,6 @@ const app = {
         const units = [100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1];
         document.getElementById('cash-container').innerHTML = units.map(u => {
             let def = "";
-            // Application de tes quantités par défaut
             if (u === 20) def = "2";
             if (u === 10 || u === 5) def = "4";
             if (u === 2 || u === 1) def = "10";
@@ -61,6 +59,13 @@ const app = {
                     <input type="number" data-unit="${u}" class="cash-in" inputmode="numeric" value="${def}">
                 </div>`;
         }).join('');
+    },
+
+    // NOUVELLE FONCTION POUR BASCULER ENTRE PAPIER ET CONNECT
+    toggleAncvInput() {
+        const isPapier = document.getElementById('type-p').checked;
+        document.getElementById('ancv-values-papier').classList.toggle('hidden', !isPapier);
+        document.getElementById('ancv-values-connect').classList.toggle('hidden', isPapier);
     },
     
     addItem(type) {
@@ -74,10 +79,22 @@ const app = {
             document.getElementById('check-amt-soir').value = '';
         } else if (type === 'ancv') {
             const q = parseInt(document.getElementById('ancv-qty-soir').value);
-            const v = parseFloat(document.getElementById('ancv-val-soir').value);
             const t = document.querySelector('input[name="ancv-t"]:checked').value;
-            if (q > 0 && v > 0) this.state.ancv.push({ val: v, qty: q, type: t });
-            document.getElementById('ancv-qty-soir').value = '';
+            let v = 0;
+
+            if (t === 'Papier') {
+                // On récupère la valeur du bouton radio (10, 25 ou 50)
+                v = parseFloat(document.querySelector('input[name="ancv-v-fixe"]:checked').value);
+            } else {
+                // On récupère la valeur saisie librement pour Connect
+                v = parseFloat(document.getElementById('ancv-val-soir').value);
+            }
+
+            if (q > 0 && v > 0) {
+                this.state.ancv.push({ val: v, qty: q, type: t });
+                document.getElementById('ancv-qty-soir').value = '';
+                document.getElementById('ancv-val-soir').value = '';
+            }
         }
         this.refreshUI();
     },
@@ -122,7 +139,6 @@ const app = {
                 posCashLogiciel: v('midi-cash'), deltaCash: 0
             };
         } else {
-            // CALCUL DES TOTAUX POUR LE RECAP (Contact + Sans Contact)
             const cbTotalVal = v('cb-contact-soir') + v('cb-sans-contact-soir');
             const trTotalVal = v('tr-contact-soir') + v('tr-sans-contact-soir');
             
@@ -202,8 +218,8 @@ const app = {
         this.refreshUI();
     },
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v25', JSON.stringify(this.state)); },
-    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v25')); if(s) this.state = s; },
+    saveToStorage() { localStorage.setItem('vesuvio_v28', JSON.stringify(this.state)); },
+    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v28')); if(s) this.state = s; },
     bindEvents() { document.addEventListener('input', () => this.refreshUI()); }
 };
 document.addEventListener('DOMContentLoaded', () => app.init());
