@@ -1,9 +1,9 @@
+
 const app = {
     state: {
         service: 'Midi',
         ancv: [], checks: [], mypos: [],
-        fondCaisse: 134.00,
-        midiData: null 
+        fondCaisse: 134.00
     },
     CONFIG: { SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec" },
 
@@ -98,18 +98,29 @@ const app = {
         const v = id => parseFloat(document.getElementById(id)?.value) || 0;
         const netVal = parseFloat(document.getElementById('cash-net-display')?.textContent) || 0;
         let f = {};
+
         if (this.state.service === 'Midi') {
             f = {
-                service: 'Midi', cb: v('midi-cb'), tr: v('midi-tr'), mypos: v('midi-mypos'),
-                cashNet: v('midi-cash'), ancvP: v('midi-ancv'), ancvC: 0,
+                service: 'Midi', 
+                cb: v('midi-cb'), tr: v('midi-tr'), mypos: v('midi-mypos'),
+                cashNet: v('midi-cash'), 
+                ancvP: v('midi-ancv-p'),
+                ancvC: v('midi-ancv-c'),
                 checks: v('midi-checks'), pizzas_e: v('midi-piz-e'), pizzas_p: v('midi-piz-p'),
                 tva5: v('midi-tva5'), tva10: v('midi-tva10'), tva20: v('midi-tva20'),
                 posCashLogiciel: v('midi-cash'), deltaCash: 0
             };
         } else {
+            // CALCUL DES TOTAUX POUR LE RECAP (Contact + Sans Contact)
+            const cbTotalVal = v('cb-contact-soir') + v('cb-sans-contact-soir');
+            const trTotalVal = v('tr-contact-soir') + v('tr-sans-contact-soir');
+            
             f = {
-                service: 'Soir', cb: v('cb-total-soir'), tr: v('tr-total-soir'),
-                mypos: this.state.mypos.reduce((a, b) => a + b, 0), cashNet: netVal,
+                service: 'Soir', 
+                cb: cbTotalVal,
+                tr: trTotalVal,
+                mypos: this.state.mypos.reduce((a, b) => a + b, 0), 
+                cashNet: netVal,
                 ancvP: this.state.ancv.filter(i => i.type === 'Papier').reduce((a, b) => a + (b.val * b.qty), 0),
                 ancvC: this.state.ancv.filter(i => i.type === 'Connect').reduce((a, b) => a + (b.val * b.qty), 0),
                 checks: this.state.checks.reduce((a, b) => a + b, 0),
@@ -124,31 +135,40 @@ const app = {
     },
 
     renderFinalRecap(f) {
-        const titleLabel = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CLÔTURE';
+        const title = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CLÔTURE';
         const caCaisse = (f.cb||0)+(f.tr||0)+(f.ancvP||0)+(f.ancvC||0)+(f.checks||0)+(f.posCashLogiciel||0);
-        const row = (label, val) => {
-            if (!val || val === 0 || val === "0.00") return "";
-            return `<div class="recap-row"><span>${label}</span> <b>${val.toFixed(2)}€</b></div>`;
-        };
+        const row = (l, v) => `<div class="recap-row"><span>${l}</span><b>${(v||0).toFixed(2)}€</b></div>`;
+
         let html = `
             <div class="recap-list-final">
-                <div class="recap-row" style="font-size:1.1rem; border-bottom:2px solid #334155; padding-bottom:5px; margin-bottom:10px;">
-                    <span>Type : <b>${titleLabel}</b></span><span>CA Caisse : <b>${caCaisse.toFixed(2)}€</b></span>
+                <h2 style="margin:0 0 10px 0; border-bottom:2px solid #333; font-size:1.2rem;">${title}</h2>
+                ${row("CB Total (Z)", f.cb)}
+                ${row("CB TR Total (Z)", f.tr)}
+                ${row("Chèques", f.checks)}
+                ${row("ANCV Papier", f.ancvP)}
+                ${row("ANCV Connect", f.ancvC)}
+                <div style="margin:10px 0; padding:10px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:5px;">
+                    <div style="font-weight:bold; margin-bottom:5px; color:#475569;">CONTRÔLE ESPÈCES</div>
+                    ${row("Espèces Adipos (Z)", f.posCashLogiciel)}
+                    ${row("Espèces Réel (Net)", f.cashNet)}
+                    <div class="recap-row" style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;">
+                        <span>ÉCART CAISSE</span>
+                        <b style="color:${f.deltaCash < 0 ? '#dc2626' : '#16a34a'}">${f.deltaCash.toFixed(2)}€</b>
+                    </div>
                 </div>
-                ${row("CB", f.cb)} ${row("CB TR", f.tr)} ${row("Espèces Adipos", f.posCashLogiciel)}
-                ${row("ANCV Papier", f.ancvP)} ${row("ANCV Connect", f.ancvC)} ${row("Chèque", f.checks)}
-                <hr>
-                <div style="background:${f.deltaCash < 0 ? '#fee2e2' : '#f0fdf4'}; padding:10px; border-radius:8px; border:1px solid ${f.deltaCash < 0 ? '#ef4444' : '#22c55e'};">
-                    <div class="recap-row"><span>Écart Espèces</span><b style="color:${f.deltaCash < 0 ? '#dc2626' : '#16a34a'}">${f.deltaCash.toFixed(2)}€</b></div>
-                    ${row("MyPos", f.mypos)}
+                <div style="background:#f8fafc; padding:8px; border-radius:5px; margin-bottom:10px; border:1px solid #e2e8f0;">
+                    <div style="font-weight:bold; margin-bottom:5px; color:#475569;">TVA</div>
+                    ${row("TVA 5.5%", f.tva5)}
+                    ${row("TVA 10%", f.tva10)}
+                    ${row("TVA 20%", f.tva20)}
                 </div>
-                <hr>
-                <div class="recap-row"><span>🍕 Nb Emporté</span> <b>${f.pizzas_e || 0}</b></div>
-                <div class="recap-row"><span>🍽️ Nb Couvert</span> <b>${f.pizzas_p || 0}</b></div>
-                <hr>
-                ${row("TVA 5.5", f.tva5)} ${row("TVA 10", f.tva10)} ${row("TVA 20", f.tva20)}
+                <div class="recap-row" style="font-size:1.1rem; background:#334155; color:white; padding:8px; border-radius:5px;">
+                    <span>CA TOTAL ADIPOS</span><b>${caCaisse.toFixed(2)}€</b>
+                </div>
+                <div style="margin-top:5px;">${row("MyPos (Hors Z)", f.mypos)}</div>
             </div>
-            <button class="btn-primary" style="margin-top:20px; width:100%;" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>`;
+            <button class="btn-primary" style="margin-top:15px; width:100%; height:50px; font-size:1.1rem;" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
+        `;
         document.getElementById('recap-body').innerHTML = html;
         document.getElementById('modal-recap').classList.remove('hidden');
     },
@@ -167,8 +187,8 @@ const app = {
         this.refreshUI();
     },
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v16', JSON.stringify(this.state)); },
-    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v16')); if(s) this.state = s; },
+    saveToStorage() { localStorage.setItem('vesuvio_v25', JSON.stringify(this.state)); },
+    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v25')); if(s) this.state = s; },
     bindEvents() { document.addEventListener('input', () => this.refreshUI()); }
 };
 document.addEventListener('DOMContentLoaded', () => app.init());
