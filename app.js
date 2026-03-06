@@ -45,11 +45,18 @@ const app = {
         window.scrollTo(0,0);
     },
 
-    renderCashGrid() {
+renderCashGrid() {
         const units = [100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1];
-        document.getElementById('cash-container').innerHTML = units.map(u => `
-            <div class="cash-item"><label>${u}€</label><input type="number" data-unit="${u}" class="cash-in" inputmode="numeric"></div>
-        `).join('');
+        // Remplissage par défaut : 5 pour 0.5, 0.2 et 0.1
+        document.getElementById('cash-container').innerHTML = units.map(u => {
+            let defaultValue = "";
+            if (u === 0.5 || u === 0.2 || u === 0.1) defaultValue = "5";
+            return `
+                <div class="cash-item">
+                    <label>${u}€</label>
+                    <input type="number" data-unit="${u}" class="cash-in" inputmode="numeric" value="${defaultValue}">
+                </div>`;
+        }).join('');
     },
 
     addItem(type) {
