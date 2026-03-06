@@ -57,7 +57,13 @@ const app = {
             return `
                 <div class="cash-item">
                     <label>${u}€</label>
-                    <input type="number" data-unit="${u}" class="cash-in" inputmode="numeric" value="${def}">
+                    <input type="number" 
+                           data-unit="${u}" 
+                           class="cash-in" 
+                           inputmode="numeric" 
+                           value="${def}"
+                           onfocus="if(this.value=='${def}') this.value='';" 
+                           onblur="if(this.value=='') this.value='${def}'; app.refreshUI();">
                 </div>`;
         }).join('');
     },
