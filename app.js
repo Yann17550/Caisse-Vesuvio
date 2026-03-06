@@ -207,21 +207,41 @@ const app = {
 
     send() {
         const btn = document.querySelector('#modal-recap .btn-primary');
-        btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
-        fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(this.lastExport) })
-        .then(() => { 
-            alert("✅ Données archivées !"); 
-            if(this.state.service==='Midi') {
-                this.saveToStorage(); // On garde midiData en mémoire
+        btn.disabled = true; 
+        btn.innerHTML = "⌛ Envoi...";
+        
+        fetch(this.CONFIG.SCRIPT_URL, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify(this.lastExport) 
+        })
+        .then(() => {
+            // SI C'EST LE MIDI
+            if(this.state.service === 'Midi') {
+                alert("✅ Midi archivé !");
+                this.saveToStorage(); 
                 this.setService('Soir');
                 this.closeRecap();
-            } else {
-                this.state.midiData = null; // On vide le midi après la clôture soir
-                this.resetForm(); 
-                this.closeRecap(); 
+            } 
+            // SI C'EST LE SOIR (Clôture)
+            else {
+                this.closeRecap(); // On ferme le récap de clôture
+                this.state.midiData = null; // On nettoie les données
+                localStorage.removeItem('vesuvio_v29'); // On vide le stockage
+                
+                // ON AFFICHE LE GUIDE FOND DE CAISSE AUTOMATIQUEMENT
+                if (typeof FondCaisseModule !== 'undefined') {
+                    FondCaisseModule.showFinalGuide();
+                } else {
+                    alert("✅ Clôture archivée !");
+                    location.reload();
+                }
             }
         })
-        .catch(() => { alert("Erreur d'envoi"); btn.disabled = false; });
+        .catch(() => { 
+            alert("Erreur d'envoi"); 
+            btn.disabled = false; 
+        });
     },
 
     resetForm() {
