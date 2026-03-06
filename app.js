@@ -5,7 +5,7 @@ const app = {
         fondCaisse: 134.00,
         midiData: null 
     },
-    CONFIG: { SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec" },
+    CONFIG: { SCRIPT_URL: "TON_URL_SCRIPT" },
 
     init() {
         this.renderCashGrid();
@@ -76,32 +76,27 @@ const app = {
     refreshUI() {
         const fInput = document.getElementById('fond-caisse-input');
         if (fInput) this.state.fondCaisse = parseFloat(fInput.value) || 0;
-
         let brut = 0;
         document.querySelectorAll('.cash-in').forEach(i => brut += (parseFloat(i.dataset.unit) * (parseInt(i.value) || 0)));
         const net = brut - this.state.fondCaisse;
         if(document.getElementById('cash-net-display')) document.getElementById('cash-net-display').textContent = net.toFixed(2);
-
-        this.updateList('mypos-recap-soir', this.state.mypos, 'MYPOS');
-        this.updateList('checks-recap-soir', this.state.checks, 'CHÈQUE');
-        this.updateList('ancv-recap-soir', this.state.ancv, 'ANCV', true);
+        this.updateList('mypos-recap-soir', this.state.mypos, 'mypos');
+        this.updateList('checks-recap-soir', this.state.checks, 'checks');
+        this.updateList('ancv-recap-soir', this.state.ancv, 'ancv', true);
         this.saveToStorage();
     },
 
-    updateList(id, data, label, isAncv = false) {
-        const el = document.getElementById(id);
-        if (!el) return;
+    updateList(id, data, typeKey, isAncv = false) {
+        const el = document.getElementById(id); if (!el) return;
         el.innerHTML = data.map((v, i) => {
-            const txt = isAncv ? `${v.type} ${v.qty}x${v.val}€` : `${label} ${v}€`;
-            const key = isAncv ? 'ancv' : (label === 'MYPOS' ? 'mypos' : 'checks');
-            return `<div class="list-item"><span>${txt}</span><button onclick="app.removeItem('${key}', ${i})">❌</button></div>`;
+            const txt = isAncv ? `${v.type} ${v.qty}x${v.val}€` : `${typeKey.toUpperCase()} ${v}€`;
+            return `<div class="list-item"><span>${txt}</span><button onclick="app.removeItem('${typeKey}', ${i})">❌</button></div>`;
         }).join('');
     },
 
     openRecap() {
         const v = id => parseFloat(document.getElementById(id)?.value) || 0;
         const netVal = parseFloat(document.getElementById('cash-net-display')?.textContent) || 0;
-        
         let f = {};
         if (this.state.service === 'Midi') {
             f = {
@@ -114,8 +109,7 @@ const app = {
         } else {
             f = {
                 service: 'Soir', cb: v('cb-total-soir'), tr: v('tr-total-soir'),
-                mypos: this.state.mypos.reduce((a, b) => a + b, 0),
-                cashNet: netVal,
+                mypos: this.state.mypos.reduce((a, b) => a + b, 0), cashNet: netVal,
                 ancvP: this.state.ancv.filter(i => i.type === 'Papier').reduce((a, b) => a + (b.val * b.qty), 0),
                 ancvC: this.state.ancv.filter(i => i.type === 'Connect').reduce((a, b) => a + (b.val * b.qty), 0),
                 checks: this.state.checks.reduce((a, b) => a + b, 0),
@@ -130,14 +124,16 @@ const app = {
     },
 
     renderFinalRecap(f) {
-        const title = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CLÔTURE';
+        const titleLabel = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CLÔTURE';
         const caCaisse = (f.cb||0)+(f.tr||0)+(f.ancvP||0)+(f.ancvC||0)+(f.checks||0)+(f.posCashLogiciel||0);
-        const row = (l, v) => (v && v !== 0) ? `<div class="recap-row"><span>${l}</span><b>${v.toFixed(2)}€</b></div>` : '';
-
+        const row = (label, val) => {
+            if (!val || val === 0 || val === "0.00") return "";
+            return `<div class="recap-row"><span>${label}</span> <b>${val.toFixed(2)}€</b></div>`;
+        };
         let html = `
             <div class="recap-list-final">
                 <div class="recap-row" style="font-size:1.1rem; border-bottom:2px solid #334155; padding-bottom:5px; margin-bottom:10px;">
-                    <span><b>${title}</b></span><span>CA Caisse: <b>${caCaisse.toFixed(2)}€</b></span>
+                    <span>Type : <b>${titleLabel}</b></span><span>CA Caisse : <b>${caCaisse.toFixed(2)}€</b></span>
                 </div>
                 ${row("CB", f.cb)} ${row("CB TR", f.tr)} ${row("Espèces Adipos", f.posCashLogiciel)}
                 ${row("ANCV Papier", f.ancvP)} ${row("ANCV Connect", f.ancvC)} ${row("Chèque", f.checks)}
@@ -147,8 +143,8 @@ const app = {
                     ${row("MyPos", f.mypos)}
                 </div>
                 <hr>
-                <div class="recap-row"><span>🍕 Emporté</span><b>${f.pizzas_e || 0}</b></div>
-                <div class="recap-row"><span>🍽️ Couvert</span><b>${f.pizzas_p || 0}</b></div>
+                <div class="recap-row"><span>🍕 Nb Emporté</span> <b>${f.pizzas_e || 0}</b></div>
+                <div class="recap-row"><span>🍽️ Nb Couvert</span> <b>${f.pizzas_p || 0}</b></div>
                 <hr>
                 ${row("TVA 5.5", f.tva5)} ${row("TVA 10", f.tva10)} ${row("TVA 20", f.tva20)}
             </div>
@@ -159,10 +155,10 @@ const app = {
 
     send() {
         const btn = document.querySelector('#modal-recap .btn-primary');
-        btn.disabled = true; btn.innerHTML = "⌛...";
+        btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
         fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(this.lastExport) })
-        .then(() => { alert("✅ OK"); this.resetForm(); this.closeRecap(); if(this.state.service==='Midi') this.setService('Soir'); })
-        .catch(() => { alert("Erreur"); btn.disabled = false; });
+        .then(() => { alert("✅ Données archivées !"); this.resetForm(); this.closeRecap(); if(this.state.service==='Midi') this.setService('Soir'); })
+        .catch(() => { alert("Erreur d'envoi"); btn.disabled = false; });
     },
 
     resetForm() {
@@ -171,8 +167,8 @@ const app = {
         this.refreshUI();
     },
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v15', JSON.stringify(this.state)); },
-    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v15')); if(s) this.state = s; },
+    saveToStorage() { localStorage.setItem('vesuvio_v16', JSON.stringify(this.state)); },
+    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v16')); if(s) this.state = s; },
     bindEvents() { document.addEventListener('input', () => this.refreshUI()); }
 };
 document.addEventListener('DOMContentLoaded', () => app.init());
