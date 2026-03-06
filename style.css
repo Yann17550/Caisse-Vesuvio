@@ -85,6 +85,12 @@ h1 {
     border: 1px solid var(--border); 
 }
 
+/* pour un espace avant les boutons AJOUTER*/
+.card-section > input[type="number"] {
+    margin-bottom: 15px;
+    width: 100%; /* Pour que l'input prenne toute la largeur au-dessus du bouton */
+}
+
 h2 { 
     font-size: 0.85rem; 
     color: #64748b; 
