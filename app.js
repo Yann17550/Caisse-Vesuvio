@@ -11,7 +11,7 @@ const app = {
         this.renderCashGrid();
         this.loadFromStorage();
         if(document.getElementById('fond-caisse-input')) 
-            document.getElementById('fond-caisse-input').value = this.state.fondCaisse;
+            document.getElementById('fond-caisse-input').value = this.state.fondCaisse.toFixed(2);
         this.setService(this.state.service);
         this.bindEvents();
         this.refreshUI();
@@ -45,20 +45,24 @@ const app = {
         window.scrollTo(0,0);
     },
 
-renderCashGrid() {
+    renderCashGrid() {
         const units = [100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1];
-        // Remplissage par défaut : 5 pour 0.5, 0.2 et 0.1
         document.getElementById('cash-container').innerHTML = units.map(u => {
-            let defaultValue = "";
-            if (u === 0.5 || u === 0.2 || u === 0.1) defaultValue = "5";
+            let def = "";
+            // Application de tes quantités par défaut
+            if (u === 20) def = "2";
+            if (u === 10 || u === 5) def = "4";
+            if (u === 2 || u === 1) def = "10";
+            if (u === 0.5 || u === 0.2 || u === 0.1) def = "5";
+            
             return `
                 <div class="cash-item">
                     <label>${u}€</label>
-                    <input type="number" data-unit="${u}" class="cash-in" inputmode="numeric" value="${defaultValue}">
+                    <input type="number" data-unit="${u}" class="cash-in" inputmode="numeric" value="${def}">
                 </div>`;
         }).join('');
     },
-
+    
     addItem(type) {
         if (type === 'mypos') {
             const v = parseFloat(document.getElementById('mypos-amt-soir').value);
@@ -191,6 +195,10 @@ renderCashGrid() {
     resetForm() {
         this.state.ancv = []; this.state.checks = []; this.state.mypos = [];
         document.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
+        this.renderCashGrid();
+        if(document.getElementById('fond-caisse-input')) {
+            document.getElementById('fond-caisse-input').value = "134.00";
+        }
         this.refreshUI();
     },
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
