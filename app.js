@@ -205,7 +205,6 @@ const app = {
         const btn = document.querySelector('#modal-recap .btn-primary');
         btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
 
-        // SOUSTRACTION INVISIBLE AVANT ENVOI SHEET
         let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
         if (dataToSend.service === 'Soir' && this.state.midiData) {
             const m = this.state.midiData;
@@ -218,24 +217,44 @@ const app = {
             dataToSend.tva5 -= m.tva5;
             dataToSend.tva10 -= m.tva10;
             dataToSend.tva20 -= m.tva20;
-            // Pizzas et CashNet restent tels quels
         }
 
         fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataToSend) })
         .then(() => {
             if(this.state.service === 'Midi') {
                 alert("✅ Midi archivé !");
+                
+                // --- AJOUT ICI : VIDAGE DES DONNÉES TEMPORAIRES ---
+                this.state.ancv = [];
+                this.state.checks = [];
+                this.state.mypos = [];
+                // On garde midiData mais on vide les listes de saisie pour le soir
+                
                 this.saveToStorage(); 
                 this.setService('Soir');
                 this.closeRecap();
+                location.reload(); // Un refresh propre pour repartir à zéro pour le soir
             } else {
                 this.closeRecap();
+                // Pour le soir, on nettoie tout
                 this.state.midiData = null;
+                this.state.ancv = [];
+                this.state.checks = [];
+                this.state.mypos = [];
+                
                 localStorage.removeItem('vesuvio_v29');
-                if (typeof FondCaisseModule !== 'undefined') FondCaisseModule.showFinalGuide();
-                else location.reload();
+                
+                if (typeof FondCaisseModule !== 'undefined') {
+                    FondCaisseModule.showFinalGuide();
+                } else {
+                    location.reload();
+                }
             }
-        }).catch(() => { alert("Erreur d'envoi"); btn.disabled = false; });
+        }).catch(() => { 
+            alert("Erreur d'envoi"); 
+            btn.disabled = false; 
+            btn.innerHTML = "💾 ARCHIVER LE SERVICE";
+        });
     },
 
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
