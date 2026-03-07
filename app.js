@@ -11,11 +11,9 @@ const app = {
         this.loadFromStorage();
         this.renderCashGrid();
         
-        // Initialisation forcée du fond de caisse
         const fInput = document.getElementById('fond-caisse-input');
         if(fInput) fInput.value = this.state.fondCaisse.toFixed(2);
         
-        // On lance le service enregistré (ou Midi par défaut)
         this.setService(this.state.service);
         this.bindEvents();
         this.refreshUI();
@@ -23,17 +21,13 @@ const app = {
 
     setService(mode) {
         this.state.service = mode;
-        
-        // Thème visuel
         document.body.className = (mode === 'Midi') ? 'theme-midi' : 'theme-soir';
         
-        // Boutons du haut
         const bM = document.getElementById('btn-midi');
         const bS = document.getElementById('btn-soir');
         if(bM) bM.className = (mode === 'Midi') ? 'active-midi' : '';
         if(bS) bS.className = (mode === 'Soir') ? 'active-soir' : '';
         
-        // Visibilité des sections
         const viewMidi = document.getElementById('view-midi-fast');
         const containerSoir = document.getElementById('views-soir-container');
         const navMidiBtn = document.getElementById('nav-midi-btn');
@@ -49,7 +43,7 @@ const app = {
             if(containerSoir) containerSoir.classList.remove('hidden');
             if(navMidiBtn) navMidiBtn.classList.add('hidden');
             soirOnlyBtns.forEach(b => b.classList.remove('hidden'));
-            this.showView('view-cards-soir'); // Vue CB par défaut
+            this.showView('view-cards-soir');
         }
         this.saveToStorage();
     },
@@ -146,10 +140,9 @@ const app = {
     openRecap() {
         const v = id => parseFloat(document.getElementById(id)?.value) || 0;
         const netVal = parseFloat(document.getElementById('cash-net-display')?.textContent) || 0;
-        let f = {};
-
+        
         if (this.state.service === 'Midi') {
-            f = {
+            this.lastExport = {
                 service: 'Midi', 
                 cb: v('midi-cb'), tr: v('midi-tr'), mypos: v('midi-mypos'),
                 cashNet: v('midi-cash'), ancvP: v('midi-ancv-p'), ancvC: v('midi-ancv-c'),
@@ -157,26 +150,28 @@ const app = {
                 tva5: v('midi-tva5'), tva10: v('midi-tva10'), tva20: v('midi-tva20'),
                 posCashLogiciel: v('midi-cash'), deltaCash: 0
             };
-            this.state.midiData = JSON.parse(JSON.stringify(f));
+            this.state.midiData = JSON.parse(JSON.stringify(this.lastExport));
         } else {
-            const m = this.state.midiData || { cb:0, tr:0, tva5:0, tva10:0, tva20:0 };
-            f = {
+            // AFFICHAGE DES CUMULS RÉELS POUR TON CONTRÔLE
+            this.lastExport = {
                 service: 'Soir', 
-                cb: (v('cb-contact-soir') + v('cb-sans-contact-soir')) - m.cb,
-                tr: (v('tr-contact-soir') + v('tr-sans-contact-soir')) - m.tr,
+                cb: (v('cb-contact-soir') + v('cb-sans-contact-soir')),
+                tr: (v('tr-contact-soir') + v('tr-sans-contact-soir')),
                 mypos: this.state.mypos.reduce((a, b) => a + b, 0), 
                 cashNet: netVal,
                 ancvP: this.state.ancv.filter(i => i.type === 'Papier').reduce((a, b) => a + (b.val * b.qty), 0),
                 ancvC: this.state.ancv.filter(i => i.type === 'Connect').reduce((a, b) => a + (b.val * b.qty), 0),
                 checks: this.state.checks.reduce((a, b) => a + b, 0),
-                pizzas_e: v('pos-piz-e-soir'), pizzas_p: v('pos-piz-p-soir'),
-                tva5: v('tva5-soir') - m.tva5, tva10: v('tva10-soir') - m.tva10, tva20: v('tva20-soir') - m.tva20,
+                pizzas_e: v('pos-piz-e-soir'), 
+                pizzas_p: v('pos-piz-p-soir'),
+                tva5: v('tva5-soir'), 
+                tva10: v('tva10-soir'), 
+                tva20: v('tva20-soir'),
                 posCashLogiciel: v('pos-cash-soir')
             };
-            f.deltaCash = parseFloat((f.cashNet - f.posCashLogiciel).toFixed(2));
+            this.lastExport.deltaCash = parseFloat((this.lastExport.cashNet - this.lastExport.posCashLogiciel).toFixed(2));
         }
-        this.lastExport = f;
-        this.renderFinalRecap(f);
+        this.renderFinalRecap(this.lastExport);
     },
 
     renderFinalRecap(f) {
@@ -190,14 +185,14 @@ const app = {
                 ${row("CB", f.cb)} ${row("CB TR", f.tr)} ${row("Chèques", f.checks)}
                 ${row("ANCV P.", f.ancvP)} ${row("ANCV C.", f.ancvC)}
                 <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-                    ${row("Esp. Logiciel", f.posCashLogiciel)}
-                    ${row("Esp. Réel", f.cashNet)}
+                    ${row("Esp. Logiciel (Z)", f.posCashLogiciel)}
+                    ${row("Esp. Réel (Compté)", f.cashNet)}
                     <div class="recap-row" style="margin-top:5px; border-top:1px dashed #ccc;">
                         <span>ÉCART</span><b style="color:${f.deltaCash < 0 ? '#dc2626' : '#16a34a'}">${f.deltaCash.toFixed(2)}€</b>
                     </div>
                 </div>
                 <div class="recap-row" style="background:#334155; color:white; padding:8px; border-radius:5px;">
-                    <span>CA TOTAL</span><b>${caTotal.toFixed(2)}€</b>
+                    <span>CA TOTAL RÉEL</span><b>${caTotal.toFixed(2)}€</b>
                 </div>
             </div>
             <button class="btn-primary" style="margin-top:15px; width:100%;" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
@@ -209,7 +204,24 @@ const app = {
     send() {
         const btn = document.querySelector('#modal-recap .btn-primary');
         btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
-        fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(this.lastExport) })
+
+        // SOUSTRACTION INVISIBLE AVANT ENVOI SHEET
+        let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
+        if (dataToSend.service === 'Soir' && this.state.midiData) {
+            const m = this.state.midiData;
+            dataToSend.cb -= m.cb;
+            dataToSend.tr -= m.tr;
+            dataToSend.mypos -= m.mypos;
+            dataToSend.ancvP -= m.ancvP;
+            dataToSend.ancvC -= m.ancvC;
+            dataToSend.checks -= m.checks;
+            dataToSend.tva5 -= m.tva5;
+            dataToSend.tva10 -= m.tva10;
+            dataToSend.tva20 -= m.tva20;
+            // Pizzas et CashNet restent tels quels
+        }
+
+        fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataToSend) })
         .then(() => {
             if(this.state.service === 'Midi') {
                 alert("✅ Midi archivé !");
@@ -226,12 +238,6 @@ const app = {
         }).catch(() => { alert("Erreur d'envoi"); btn.disabled = false; });
     },
 
-    resetForm() {
-        this.state.ancv = []; this.state.checks = []; this.state.mypos = [];
-        document.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
-        this.renderCashGrid();
-        this.refreshUI();
-    },
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
     saveToStorage() { localStorage.setItem('vesuvio_v29', JSON.stringify(this.state)); },
     loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v29')); if(s) this.state = s; },
