@@ -206,18 +206,7 @@ const app = {
         btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
 
         let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
-        if (dataToSend.service === 'Soir' && this.state.midiData) {
-            const m = this.state.midiData;
-            dataToSend.cb -= m.cb;
-            dataToSend.tr -= m.tr;
-            dataToSend.mypos -= m.mypos;
-            dataToSend.ancvP -= m.ancvP;
-            dataToSend.ancvC -= m.ancvC;
-            dataToSend.checks -= m.checks;
-            dataToSend.tva5 -= m.tva5;
-            dataToSend.tva10 -= m.tva10;
-            dataToSend.tva20 -= m.tva20;
-        }
+
 
         fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataToSend) })
         .then(() => {
