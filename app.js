@@ -2,8 +2,7 @@ const app = {
     state: {
         service: 'Midi',
         ancv: [], checks: [], mypos: [],
-        fondCaisse: 134.00,
-        midiData: null
+        fondCaisse: 134.00
     },
     CONFIG: { SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw-Ovrq3YgPdlAH2SbQhBU90N4xcpfTxZSbbGNiTLao3hjz6Lk8QZwYB-a4pIWshT9PDA/exec" },
 
@@ -150,9 +149,7 @@ const app = {
                 tva5: v('midi-tva5'), tva10: v('midi-tva10'), tva20: v('midi-tva20'),
                 posCashLogiciel: v('midi-cash'), deltaCash: 0
             };
-            this.state.midiData = JSON.parse(JSON.stringify(this.lastExport));
         } else {
-            // AFFICHAGE DES CUMULS RÉELS POUR TON CONTRÔLE
             this.lastExport = {
                 service: 'Soir', 
                 cb: (v('cb-contact-soir') + v('cb-sans-contact-soir')),
@@ -201,46 +198,46 @@ const app = {
         document.getElementById('modal-recap').classList.remove('hidden');
     },
 
-send() {
-    const btn = document.querySelector('#modal-recap .btn-primary');
-    btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
+    send() {
+        const btn = document.querySelector('#modal-recap .btn-primary');
+        btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
 
-    let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
-    const serviceEnCours = this.state.service;
+        let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
+        const serviceEnCours = this.state.service;
 
-    const params = new URLSearchParams({ payload: JSON.stringify(dataToSend) });
-    const url = `${this.CONFIG.SCRIPT_URL}?${params.toString()}`;
+        const params = new URLSearchParams({ payload: JSON.stringify(dataToSend) });
+        const url = `${this.CONFIG.SCRIPT_URL}?${params.toString()}`;
 
-    fetch(url, { method: 'GET', mode: 'no-cors' })
-    .then(() => {
-        if(serviceEnCours === 'Midi') {
-            alert("✅ Midi archivé !");
-            this.state.ancv = [];
-            this.state.checks = [];
-            this.state.mypos = [];
-            this.saveToStorage();
-            this.setService('Soir');
-            this.closeRecap();
-            location.reload();
-        } else {
-            this.closeRecap();
-            this.state.midiData = null;
-            this.state.ancv = [];
-            this.state.checks = [];
-            this.state.mypos = [];
-            localStorage.removeItem('vesuvio_v29');
-            if (typeof FondCaisseModule !== 'undefined') {
-                FondCaisseModule.showFinalGuide();
-            } else {
+        fetch(url, { method: 'GET', mode: 'no-cors' })
+        .then(() => {
+            if(serviceEnCours === 'Midi') {
+                alert("✅ Midi archivé !");
+                this.state.ancv = [];
+                this.state.checks = [];
+                this.state.mypos = [];
+                this.saveToStorage();
+                this.setService('Soir');
+                this.closeRecap();
                 location.reload();
+            } else {
+                this.closeRecap();
+                this.state.ancv = [];
+                this.state.checks = [];
+                this.state.mypos = [];
+                localStorage.removeItem('vesuvio_v29');
+                if (typeof FondCaisseModule !== 'undefined') {
+                    FondCaisseModule.showFinalGuide();
+                } else {
+                    location.reload();
+                }
             }
-        }
-    }).catch(() => { 
-        alert("Erreur d'envoi"); 
-        btn.disabled = false; 
-        btn.innerHTML = "💾 ARCHIVER LE SERVICE";
-    });
-},
+        }).catch(() => { 
+            alert("Erreur d'envoi"); 
+            btn.disabled = false; 
+            btn.innerHTML = "💾 ARCHIVER LE SERVICE";
+        });
+    },
+
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
     saveToStorage() { localStorage.setItem('vesuvio_v29', JSON.stringify(this.state)); },
     loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v29')); if(s) this.state = s; },
@@ -250,6 +247,6 @@ send() {
             if(e.target.tagName === 'INPUT' && e.target.value === '0') e.target.value = '';
         });
     }
-}; 
+};
 
 document.addEventListener('DOMContentLoaded', () => app.init());
