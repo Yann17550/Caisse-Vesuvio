@@ -211,6 +211,8 @@ send() {
     const params = new URLSearchParams({ payload: JSON.stringify(dataToSend) });
     const url = `${this.CONFIG.SCRIPT_URL}?${params.toString()}`;
 
+    console.log('URL envoyée :', url);
+    
     fetch(url, { method: 'GET', mode: 'no-cors' })
     .then(() => {
         if(this.state.service === 'Midi') {
