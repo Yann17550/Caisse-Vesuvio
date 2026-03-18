@@ -241,4 +241,15 @@ send() {
         btn.innerHTML = "💾 ARCHIVER LE SERVICE";
     });
 },
+    closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
+    saveToStorage() { localStorage.setItem('vesuvio_v29', JSON.stringify(this.state)); },
+    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v29')); if(s) this.state = s; },
+    bindEvents() { 
+        document.addEventListener('input', () => this.refreshUI());
+        document.addEventListener('focusin', (e) => {
+            if(e.target.tagName === 'INPUT' && e.target.value === '0') e.target.value = '';
+        });
+    }
+}; 
+
 document.addEventListener('DOMContentLoaded', () => app.init());
