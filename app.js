@@ -5,7 +5,7 @@ const app = {
         fondCaisse: 134.00,
         midiData: null
     },
-    CONFIG: { SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwrcBUs3ubqrkykwD3mlxK2Gu8Lu9IJaVO99c4Eek4WHbPFoFsCsztuRyhYva8EwRpAHQ/exec" },
+    CONFIG: { SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw-Ovrq3YgPdlAH2SbQhBU90N4xcpfTxZSbbGNiTLao3hjz6Lk8QZwYB-a4pIWshT9PDA/exec" },
 
     init() {
         this.loadFromStorage();
