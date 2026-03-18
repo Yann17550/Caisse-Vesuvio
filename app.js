@@ -207,41 +207,14 @@ send() {
 
     let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
     
-    // On encode les données en paramètre GET
     const params = new URLSearchParams({ payload: JSON.stringify(dataToSend) });
     const url = `${this.CONFIG.SCRIPT_URL}?${params.toString()}`;
 
-    console.log('URL envoyée :', url);
+    // OUVRE L'URL DIRECTEMENT DANS UN NOUVEL ONGLET
+    window.open(url, '_blank');
     
-    fetch(url, { method: 'GET', mode: 'no-cors' })
-    .then(() => {
-        if(this.state.service === 'Midi') {
-            alert("✅ Midi archivé !");
-            this.state.ancv = [];
-            this.state.checks = [];
-            this.state.mypos = [];
-            this.saveToStorage();
-            this.setService('Soir');
-            this.closeRecap();
-            location.reload();
-        } else {
-            this.closeRecap();
-            this.state.midiData = null;
-            this.state.ancv = [];
-            this.state.checks = [];
-            this.state.mypos = [];
-            localStorage.removeItem('vesuvio_v29');
-            if (typeof FondCaisseModule !== 'undefined') {
-                FondCaisseModule.showFinalGuide();
-            } else {
-                location.reload();
-            }
-        }
-    }).catch(() => { 
-        alert("Erreur d'envoi"); 
-        btn.disabled = false; 
-        btn.innerHTML = "💾 ARCHIVER LE SERVICE";
-    });
+    btn.disabled = false;
+    btn.innerHTML = "💾 ARCHIVER LE SERVICE";
 },
 
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
