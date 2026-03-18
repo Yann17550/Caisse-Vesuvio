@@ -201,50 +201,46 @@ const app = {
         document.getElementById('modal-recap').classList.remove('hidden');
     },
 
-    send() {
-        const btn = document.querySelector('#modal-recap .btn-primary');
-        btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
+send() {
+    const btn = document.querySelector('#modal-recap .btn-primary');
+    btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
 
-        let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
+    let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
+    
+    // On encode les données en paramètre GET
+    const params = new URLSearchParams({ payload: JSON.stringify(dataToSend) });
+    const url = `${this.CONFIG.SCRIPT_URL}?${params.toString()}`;
 
-
-        fetch(this.CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataToSend) })
-        .then(() => {
-            if(this.state.service === 'Midi') {
-                alert("✅ Midi archivé !");
-                
-                // --- AJOUT ICI : VIDAGE DES DONNÉES TEMPORAIRES ---
-                this.state.ancv = [];
-                this.state.checks = [];
-                this.state.mypos = [];
-                // On garde midiData mais on vide les listes de saisie pour le soir
-                
-                this.saveToStorage(); 
-                this.setService('Soir');
-                this.closeRecap();
-                location.reload(); // Un refresh propre pour repartir à zéro pour le soir
+    fetch(url, { method: 'GET', mode: 'no-cors' })
+    .then(() => {
+        if(this.state.service === 'Midi') {
+            alert("✅ Midi archivé !");
+            this.state.ancv = [];
+            this.state.checks = [];
+            this.state.mypos = [];
+            this.saveToStorage();
+            this.setService('Soir');
+            this.closeRecap();
+            location.reload();
+        } else {
+            this.closeRecap();
+            this.state.midiData = null;
+            this.state.ancv = [];
+            this.state.checks = [];
+            this.state.mypos = [];
+            localStorage.removeItem('vesuvio_v29');
+            if (typeof FondCaisseModule !== 'undefined') {
+                FondCaisseModule.showFinalGuide();
             } else {
-                this.closeRecap();
-                // Pour le soir, on nettoie tout
-                this.state.midiData = null;
-                this.state.ancv = [];
-                this.state.checks = [];
-                this.state.mypos = [];
-                
-                localStorage.removeItem('vesuvio_v29');
-                
-                if (typeof FondCaisseModule !== 'undefined') {
-                    FondCaisseModule.showFinalGuide();
-                } else {
-                    location.reload();
-                }
+                location.reload();
             }
-        }).catch(() => { 
-            alert("Erreur d'envoi"); 
-            btn.disabled = false; 
-            btn.innerHTML = "💾 ARCHIVER LE SERVICE";
-        });
-    },
+        }
+    }).catch(() => { 
+        alert("Erreur d'envoi"); 
+        btn.disabled = false; 
+        btn.innerHTML = "💾 ARCHIVER LE SERVICE";
+    });
+},
 
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
     saveToStorage() { localStorage.setItem('vesuvio_v29', JSON.stringify(this.state)); },
