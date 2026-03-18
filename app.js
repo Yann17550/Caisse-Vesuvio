@@ -206,25 +206,39 @@ send() {
     btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
 
     let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
-    
+    const serviceEnCours = this.state.service;
+
     const params = new URLSearchParams({ payload: JSON.stringify(dataToSend) });
     const url = `${this.CONFIG.SCRIPT_URL}?${params.toString()}`;
 
-    // OUVRE L'URL DIRECTEMENT DANS UN NOUVEL ONGLET
-    window.open(url, '_blank');
-    
-    btn.disabled = false;
-    btn.innerHTML = "💾 ARCHIVER LE SERVICE";
+    fetch(url, { method: 'GET', mode: 'no-cors' })
+    .then(() => {
+        if(serviceEnCours === 'Midi') {
+            alert("✅ Midi archivé !");
+            this.state.ancv = [];
+            this.state.checks = [];
+            this.state.mypos = [];
+            this.saveToStorage();
+            this.setService('Soir');
+            this.closeRecap();
+            location.reload();
+        } else {
+            this.closeRecap();
+            this.state.midiData = null;
+            this.state.ancv = [];
+            this.state.checks = [];
+            this.state.mypos = [];
+            localStorage.removeItem('vesuvio_v29');
+            if (typeof FondCaisseModule !== 'undefined') {
+                FondCaisseModule.showFinalGuide();
+            } else {
+                location.reload();
+            }
+        }
+    }).catch(() => { 
+        alert("Erreur d'envoi"); 
+        btn.disabled = false; 
+        btn.innerHTML = "💾 ARCHIVER LE SERVICE";
+    });
 },
-
-    closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v29', JSON.stringify(this.state)); },
-    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v29')); if(s) this.state = s; },
-    bindEvents() { 
-        document.addEventListener('input', () => this.refreshUI());
-        document.addEventListener('focusin', (e) => {
-            if(e.target.tagName === 'INPUT' && e.target.value === '0') e.target.value = '';
-        });
-    }
-};
 document.addEventListener('DOMContentLoaded', () => app.init());
