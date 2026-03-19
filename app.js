@@ -80,6 +80,7 @@ const app = {
         const isPapier = document.getElementById('type-p').checked;
         document.getElementById('ancv-values-papier').classList.toggle('hidden', !isPapier);
         document.getElementById('ancv-values-connect').classList.toggle('hidden', isPapier);
+        document.getElementById('ancv-qty-wrapper').classList.toggle('hidden', !isPapier);
     },
     
     addItem(type) {
@@ -92,7 +93,8 @@ const app = {
             if (v > 0) this.state.checks.push(v);
             document.getElementById('check-amt-soir').value = '';
         } else if (type === 'ancv') {
-            const q = parseInt(document.getElementById('ancv-qty-soir').value);
+            const isPapier = document.querySelector('input[name="ancv-t"]:checked').value === 'Papier';
+            const q = isPapier ? parseInt(document.getElementById('ancv-qty-soir').value) : 1;
             const t = document.querySelector('input[name="ancv-t"]:checked').value;
             let v = 0;
             if (t === 'Papier') {
