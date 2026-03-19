@@ -121,19 +121,26 @@ const app = {
         
         const netDisp = document.getElementById('cash-net-display');
         if(netDisp) netDisp.textContent = net.toFixed(2);
+    
+        // --- TOTAUX CB / TR / MYPOS ---
+        const g = id => parseFloat(document.getElementById(id)?.value) || 0;
+    
+        const totalCB = g('cb-contact-soir') + g('cb-sans-contact-soir');
+        const totalTR = g('tr-contact-soir') + g('tr-sans-contact-soir');
+        const totalMyPos = this.state.mypos.reduce((a, b) => a + b, 0);
+    
+        const dispCB = document.getElementById('total-cb-display');
+        const dispTR = document.getElementById('total-tr-display');
+        const dispMyPos = document.getElementById('total-mypos-display');
+    
+        if(dispCB) dispCB.textContent = totalCB.toFixed(2);
+        if(dispTR) dispTR.textContent = totalTR.toFixed(2);
+        if(dispMyPos) dispMyPos.textContent = totalMyPos.toFixed(2);
         
         this.updateList('mypos-recap-soir', this.state.mypos, 'mypos');
         this.updateList('checks-recap-soir', this.state.checks, 'checks');
         this.updateList('ancv-recap-soir', this.state.ancv, 'ancv', true);
         this.saveToStorage();
-    },
-
-    updateList(id, data, typeKey, isAncv = false) {
-        const el = document.getElementById(id); if (!el) return;
-        el.innerHTML = data.map((v, i) => {
-            const txt = isAncv ? `${v.type} ${v.qty}x${v.val}€` : `${typeKey.toUpperCase()} ${v}€`;
-            return `<div class="list-item"><span>${txt}</span><button onclick="app.removeItem('${typeKey}', ${i})">❌</button></div>`;
-        }).join('');
     },
 
     openRecap() {
