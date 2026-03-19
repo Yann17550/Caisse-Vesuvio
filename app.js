@@ -195,8 +195,8 @@ const app = {
                         <span>ÉCART</span><b style="color:${f.deltaCash < 0 ? '#dc2626' : '#16a34a'}">${f.deltaCash.toFixed(2)}€</b>
                     </div>
                 </div>
-                <div class="recap-row" style="background:#334155; color:white; padding:8px; border-radius:5px;">
-                    <span>CA TOTAL RÉEL</span><b>${caTotal.toFixed(2)}€</b>
+                <div class="recap-row" style="background:#334155; color:#f8fafc; padding:8px; border-radius:5px;">
+                    <span style="color:#f8fafc;">CA TOTAL RÉEL</span><b style="color:#ffffff;">${caTotal.toFixed(2)}€</b>
                 </div>
             </div>
             <button class="btn-primary" style="margin-top:15px; width:100%;" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
