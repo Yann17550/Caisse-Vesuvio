@@ -121,29 +121,37 @@ const app = {
         
         const netDisp = document.getElementById('cash-net-display');
         if(netDisp) netDisp.textContent = net.toFixed(2);
-    
-        // --- TOTAUX CB / TR / MYPOS ---
+
+        // --- TOTAUX CB / TR / AMEX / MYPOS ---
         const g = id => parseFloat(document.getElementById(id)?.value) || 0;
-        
+
         const totalCB    = g('cb-contact-soir') + g('cb-sans-contact-soir');
         const totalTR    = g('tr-contact-soir') + g('tr-sans-contact-soir');
         const totalAMEX  = g('amex-contact-soir') + g('amex-sans-contact-soir');
         const totalMyPos = this.state.mypos.reduce((a, b) => a + b, 0);
-        
+
         const dispCB    = document.getElementById('total-cb-display');
         const dispTR    = document.getElementById('total-tr-display');
         const dispAMEX  = document.getElementById('total-amex-display');
         const dispMyPos = document.getElementById('total-mypos-display');
-        
+
         if(dispCB)    dispCB.textContent    = totalCB.toFixed(2);
         if(dispTR)    dispTR.textContent    = totalTR.toFixed(2);
         if(dispAMEX)  dispAMEX.textContent  = totalAMEX.toFixed(2);
         if(dispMyPos) dispMyPos.textContent = totalMyPos.toFixed(2);
-        
+
         this.updateList('mypos-recap-soir', this.state.mypos, 'mypos');
         this.updateList('checks-recap-soir', this.state.checks, 'checks');
         this.updateList('ancv-recap-soir', this.state.ancv, 'ancv', true);
         this.saveToStorage();
+    },
+
+    updateList(id, data, typeKey, isAncv = false) {
+        const el = document.getElementById(id); if (!el) return;
+        el.innerHTML = data.map((v, i) => {
+            const txt = isAncv ? `${v.type} ${v.qty}x${v.val}€` : `${typeKey.toUpperCase()} ${v}€`;
+            return `<div class="list-item"><span>${txt}</span><button onclick="app.removeItem('${typeKey}', ${i})">❌</button></div>`;
+        }).join('');
     },
 
     openRecap() {
@@ -195,43 +203,40 @@ const app = {
         const row = (l, v) => `<div class="recap-row"><span>${l}</span><b>${(v||0).toFixed(2)}€</b></div>`;
         const caTotal = (f.cb||0)+(f.tr||0)+(f.ancvP||0)+(f.ancvC||0)+(f.checks||0)+(f.posCashLogiciel||0);
 
-let html = `
-    <div class="recap-list-final">
-        <h2 style="margin:0 0 10px 0; border-bottom:2px solid #333;">${title}</h2>
-        
-        ${row("Esp. Logiciel (Z)", f.posCashLogiciel)}
-        ${row("CB", f.cb)} 
-        ${row("CB TR", f.tr)} 
-        ${row("Chèques", f.checks)}
-        ${row("ANCV P.", f.ancvP)} 
-        ${row("ANCV C.", f.ancvC)}
-       
-        
-        <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-            ${row("Esp. Réel (Compté)", f.cashNet)}
-            ${row("MyPos", f.mypos)}
-            <div class="recap-row" style="margin-top:5px; border-top:1px dashed #ccc;">
-                <span>ÉCART</span><b style="color:${f.deltaCash < 0 ? '#dc2626' : '#16a34a'}">${(f.deltaCash||0).toFixed(2)}€</b>
+        let html = `
+            <div class="recap-list-final">
+                <h2 style="margin:0 0 10px 0; border-bottom:2px solid #333;">${title}</h2>
+                ${row("CB + AMEX", f.cb)} 
+                ${row("CB TR", f.tr)} 
+                ${row("Chèques", f.checks)}
+                ${row("ANCV P.", f.ancvP)} 
+                ${row("ANCV C.", f.ancvC)}
+                <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
+                    ${row("Esp. Logiciel (Z)", f.posCashLogiciel)}
+                    ${row("Esp. Réel (Compté)", f.cashNet)}
+                    ${row("MyPos", f.mypos)}
+                    <div class="recap-row" style="margin-top:5px; border-top:1px dashed #ccc;">
+                        <span>ÉCART</span><b style="color:${f.deltaCash < 0 ? '#dc2626' : '#16a34a'}">${(f.deltaCash||0).toFixed(2)}€</b>
+                    </div>
+                </div>
+                <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
+                    <div class="recap-row"><span>🍕 Emportées</span><b>${f.pizzas_e || 0}</b></div>
+                    <div class="recap-row"><span>🍕 Sur place</span><b>${f.pizzas_p || 0}</b></div>
+                </div>
+                <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
+                    ${row("TVA 5,5%", f.tva5)}
+                    ${row("TVA 10%", f.tva10)}
+                    ${row("TVA 20%", f.tva20)}
+                </div>
+                <div class="recap-row" style="background:#334155; padding:8px; border-radius:5px;">
+                    <span style="color:#f8fafc;">CA TOTAL RÉEL</span><b style="color:#ffffff;">${caTotal.toFixed(2)}€</b>
+                </div>
             </div>
-        </div>
-
-        <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-            <div class="recap-row"><span>🍕 Emportées</span><b>${f.pizzas_e || 0}</b></div>
-            <div class="recap-row"><span>🍕 Sur place</span><b>${f.pizzas_p || 0}</b></div>
-        </div>
-
-        <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-            ${row("TVA 5,5%", f.tva5)}
-            ${row("TVA 10%", f.tva10)}
-            ${row("TVA 20%", f.tva20)}
-        </div>
-
-        <div class="recap-row" style="background:#334155; padding:8px; border-radius:5px;">
-            <span style="color:#f8fafc;">CA TOTAL RÉEL</span><b style="color:#ffffff;">${caTotal.toFixed(2)}€</b>
-        </div>
-    </div>
-    <button class="btn-primary" style="margin-top:15px; width:100%;" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
-`;
+            <button class="btn-primary" style="margin-top:15px; width:100%;" onclick="app.send()">💾 ARCHIVER LE SERVICE</button>
+        `;
+        document.getElementById('recap-body').innerHTML = html;
+        document.getElementById('modal-recap').classList.remove('hidden');
+    },
 
     send() {
         const btn = document.querySelector('#modal-recap .btn-primary');
