@@ -124,17 +124,20 @@ const app = {
     
         // --- TOTAUX CB / TR / MYPOS ---
         const g = id => parseFloat(document.getElementById(id)?.value) || 0;
-    
-        const totalCB = g('cb-contact-soir') + g('cb-sans-contact-soir');
-        const totalTR = g('tr-contact-soir') + g('tr-sans-contact-soir');
+        
+        const totalCB    = g('cb-contact-soir') + g('cb-sans-contact-soir');
+        const totalTR    = g('tr-contact-soir') + g('tr-sans-contact-soir');
+        const totalAMEX  = g('amex-contact-soir') + g('amex-sans-contact-soir');
         const totalMyPos = this.state.mypos.reduce((a, b) => a + b, 0);
-    
-        const dispCB = document.getElementById('total-cb-display');
-        const dispTR = document.getElementById('total-tr-display');
+        
+        const dispCB    = document.getElementById('total-cb-display');
+        const dispTR    = document.getElementById('total-tr-display');
+        const dispAMEX  = document.getElementById('total-amex-display');
         const dispMyPos = document.getElementById('total-mypos-display');
-    
-        if(dispCB) dispCB.textContent = totalCB.toFixed(2);
-        if(dispTR) dispTR.textContent = totalTR.toFixed(2);
+        
+        if(dispCB)    dispCB.textContent    = totalCB.toFixed(2);
+        if(dispTR)    dispTR.textContent    = totalTR.toFixed(2);
+        if(dispAMEX)  dispAMEX.textContent  = totalAMEX.toFixed(2);
         if(dispMyPos) dispMyPos.textContent = totalMyPos.toFixed(2);
         
         this.updateList('mypos-recap-soir', this.state.mypos, 'mypos');
@@ -150,16 +153,25 @@ const app = {
         if (this.state.service === 'Midi') {
             this.lastExport = {
                 service: 'Midi', 
-                cb: v('midi-cb'), tr: v('midi-tr'), mypos: v('midi-mypos'),
-                cashNet: v('midi-cash'), ancvP: v('midi-ancv-p'), ancvC: v('midi-ancv-c'),
-                checks: v('midi-checks'), pizzas_e: v('midi-piz-e'), pizzas_p: v('midi-piz-p'),
-                tva5: v('midi-tva5'), tva10: v('midi-tva10'), tva20: v('midi-tva20'),
-                posCashLogiciel: v('midi-cash'), deltaCash: 0
+                cb: v('midi-cb'),
+                tr: v('midi-tr'),
+                mypos: v('midi-mypos'),
+                cashNet: v('midi-cash'),
+                ancvP: v('midi-ancv-p'),
+                ancvC: v('midi-ancv-c'),
+                checks: v('midi-checks'),
+                pizzas_e: v('midi-piz-e'),
+                pizzas_p: v('midi-piz-p'),
+                tva5: v('midi-tva5'),
+                tva10: v('midi-tva10'),
+                tva20: v('midi-tva20'),
+                posCashLogiciel: v('midi-cash'),
+                deltaCash: 0
             };
         } else {
             this.lastExport = {
                 service: 'Soir', 
-                cb: (v('cb-contact-soir') + v('cb-sans-contact-soir')),
+                cb: (v('cb-contact-soir') + v('cb-sans-contact-soir') + v('amex-contact-soir') + v('amex-sans-contact-soir')),
                 tr: (v('tr-contact-soir') + v('tr-sans-contact-soir')),
                 mypos: this.state.mypos.reduce((a, b) => a + b, 0), 
                 cashNet: netVal,
