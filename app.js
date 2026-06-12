@@ -343,9 +343,9 @@ const app = {
 
                 <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
                     <h3 style="margin:0 0 8px 0; font-size:1rem;">TTC par taux</h3>
-
-                    <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px;">
-                        <div>
+                
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(90px, 1fr)); gap:8px; align-items:start;">
+                        <div style="min-width:0;">
                             <label for="recap-tva5" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 5,5%</label>
                             <input
                                 type="number"
@@ -353,11 +353,11 @@ const app = {
                                 value="${f.tva5 || 0}"
                                 inputmode="decimal"
                                 step="any"
-                                style="width:100%; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
+                                style="display:block; width:100%; max-width:100%; box-sizing:border-box; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
                             >
                         </div>
-
-                        <div>
+                
+                        <div style="min-width:0;">
                             <label for="recap-tva10" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 10%</label>
                             <input
                                 type="number"
@@ -365,11 +365,11 @@ const app = {
                                 value="${f.tva10 || 0}"
                                 inputmode="decimal"
                                 step="any"
-                                style="width:100%; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
+                                style="display:block; width:100%; max-width:100%; box-sizing:border-box; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
                             >
                         </div>
-
-                        <div>
+                
+                        <div style="min-width:0;">
                             <label for="recap-tva20" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 20%</label>
                             <input
                                 type="number"
@@ -377,7 +377,7 @@ const app = {
                                 value="${f.tva20 || 0}"
                                 inputmode="decimal"
                                 step="any"
-                                style="width:100%; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
+                                style="display:block; width:100%; max-width:100%; box-sizing:border-box; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
                             >
                         </div>
                     </div>
