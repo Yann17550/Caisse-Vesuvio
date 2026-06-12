@@ -271,61 +271,70 @@ input:focus { border-color: var(--accent); outline: none; background: #fff; box-
 }
 
 /* --- Cash en colonne --- */
+
 .cash-columns {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
-    margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+  align-items: start;
 }
 
 .cash-column {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px;
+  min-width: 0;
 }
 
 .cash-column h3 {
-    margin: 0 0 12px 0;
-    font-size: 1rem;
-    color: #1e293b;
-    border-bottom: 1px solid #cbd5e1;
-    padding-bottom: 6px;
+  margin: 0 0 10px 0;
+  font-size: 0.95rem;
+  color: #1e293b;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 6px;
+  text-align: center;
 }
 
 .cash-column .cash-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
 }
 
 .cash-item {
-    display: grid;
-    grid-template-columns: 1fr 88px;
-    align-items: center;
-    gap: 10px;
+  display: grid !important;
+  grid-template-columns: 1fr 64px;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.cash-item:last-child {
+  border-bottom: none;
 }
 
 .cash-item label {
-    margin: 0;
-    font-weight: 600;
-    color: #334155;
-    font-size: 0.98rem;
+  margin: 0;
+  padding-right: 0;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #334155;
+  text-align: left;
 }
 
-.cash-item input {
-    width: 100%;
-    min-height: 44px;
-    text-align: center;
-    font-size: 1rem;
-    padding: 8px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    box-sizing: border-box;
-}
-
-@media (min-width: 768px) {
-    .cash-columns {
-        grid-template-columns: 1fr 1fr;
-    }
+.cash-item input[type="number"] {
+  width: 64px;
+  min-width: 64px;
+  max-width: 64px;
+  min-height: 38px;
+  padding: 6px 4px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-align: center;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
 }
