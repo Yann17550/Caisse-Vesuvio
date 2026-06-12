@@ -341,47 +341,47 @@ const app = {
                     </div>
                 </div>
 
-                <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-                    <h3 style="margin:0 0 8px 0; font-size:1rem;">TTC par taux</h3>
-                
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(90px, 1fr)); gap:8px; align-items:start;">
-                        <div style="min-width:0;">
-                            <label for="recap-tva5" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 5,5%</label>
-                            <input
-                                type="number"
-                                id="recap-tva5"
-                                value="${f.tva5 || 0}"
-                                inputmode="decimal"
-                                step="any"
-                                style="display:block; width:100%; max-width:100%; box-sizing:border-box; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
-                            >
-                        </div>
-                
-                        <div style="min-width:0;">
-                            <label for="recap-tva10" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 10%</label>
-                            <input
-                                type="number"
-                                id="recap-tva10"
-                                value="${f.tva10 || 0}"
-                                inputmode="decimal"
-                                step="any"
-                                style="display:block; width:100%; max-width:100%; box-sizing:border-box; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
-                            >
-                        </div>
-                
-                        <div style="min-width:0;">
-                            <label for="recap-tva20" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 20%</label>
-                            <input
-                                type="number"
-                                id="recap-tva20"
-                                value="${f.tva20 || 0}"
-                                inputmode="decimal"
-                                step="any"
-                                style="display:block; width:100%; max-width:100%; box-sizing:border-box; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
-                            >
-                        </div>
-                    </div>
-                </div>
+<div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
+    <h3 style="margin:0 0 8px 0; font-size:1rem;">TTC par taux</h3>
+
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; width:100%;">
+        <div style="min-width:0; width:100%;">
+            <label for="recap-tva5" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 5,5%</label>
+            <input
+                type="number"
+                id="recap-tva5"
+                value="${f.tva5 || 0}"
+                inputmode="decimal"
+                step="any"
+                style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
+            >
+        </div>
+
+        <div style="min-width:0; width:100%;">
+            <label for="recap-tva10" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 10%</label>
+            <input
+                type="number"
+                id="recap-tva10"
+                value="${f.tva10 || 0}"
+                inputmode="decimal"
+                step="any"
+                style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
+            >
+        </div>
+
+        <div style="min-width:0; width:100%;">
+            <label for="recap-tva20" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 20%</label>
+            <input
+                type="number"
+                id="recap-tva20"
+                value="${f.tva20 || 0}"
+                inputmode="decimal"
+                step="any"
+                style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
+            >
+        </div>
+    </div>
+</div>
             `;
         }
 
