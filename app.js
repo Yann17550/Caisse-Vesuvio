@@ -235,6 +235,7 @@ renderFinalRecap(f) {
         <div class="recap-list-final">
             <h2 style="margin:0 0 10px 0; border-bottom:2px solid #333;">${title}</h2>
 
+            ${row("Esp. Logiciel (Z)", f.posCashLogiciel)}
             ${row("CB + AMEX", f.cb)}
             ${row("CB TR", f.tr)}
             ${row("Chèques", f.checks)}
@@ -242,7 +243,7 @@ renderFinalRecap(f) {
             ${row("ANCV C.", f.ancvC)}
 
             <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-                ${row("Esp. Logiciel (Z)", f.posCashLogiciel)}
+                
                 ${row("Esp. Réel (Compté)", f.cashNet)}
                 ${row("MyPos", f.mypos)}
                 <div class="recap-row" style="margin-top:5px; border-top:1px dashed #ccc;">
