@@ -240,45 +240,54 @@ const app = {
         document.getElementById('modal-recap').classList.remove('hidden');
     },
 
-    send() {
-        const btn = document.querySelector('#modal-recap .btn-primary');
-        btn.disabled = true; btn.innerHTML = "⌛ Envoi...";
+send() {
+    if (this.isSending) return;
+    this.isSending = true;
 
-        let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
-        const serviceEnCours = this.state.service;
+    const btn = document.querySelector('#modal-recap .btn-primary');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = "⌛ Envoi...";
+    }
 
-        const params = new URLSearchParams({ payload: JSON.stringify(dataToSend) });
-        const url = `${this.CONFIG.SCRIPT_URL}?${params.toString()}`;
+    let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
+    const serviceEnCours = this.state.service;
 
-        fetch(url, { method: 'GET', mode: 'no-cors' })
-        .then(() => {
-            if(serviceEnCours === 'Midi') {
-                alert("✅ Midi archivé !");
-                this.state.ancv = [];
-                this.state.checks = [];
-                this.state.mypos = [];
-                this.saveToStorage();
-                this.setService('Soir');
-                this.closeRecap();
-                location.reload();
+    const params = new URLSearchParams({ payload: JSON.stringify(dataToSend) });
+    const url = `${this.CONFIG.SCRIPT_URL}?${params.toString()}`;
+
+    fetch(url, { method: 'GET', mode: 'no-cors' })
+    .then(() => {
+        if(serviceEnCours === 'Midi') {
+            alert("✅ Midi archivé !");
+            this.state.ancv = [];
+            this.state.checks = [];
+            this.state.mypos = [];
+            this.saveToStorage();
+            this.setService('Soir');
+            this.closeRecap();
+            location.reload();
+        } else {
+            this.closeRecap();
+            this.state.ancv = [];
+            this.state.checks = [];
+            this.state.mypos = [];
+            localStorage.removeItem('vesuvio_v29');
+            if (typeof FondCaisseModule !== 'undefined') {
+                FondCaisseModule.showFinalGuide();
             } else {
-                this.closeRecap();
-                this.state.ancv = [];
-                this.state.checks = [];
-                this.state.mypos = [];
-                localStorage.removeItem('vesuvio_v29');
-                if (typeof FondCaisseModule !== 'undefined') {
-                    FondCaisseModule.showFinalGuide();
-                } else {
-                    location.reload();
-                }
+                location.reload();
             }
-        }).catch(() => { 
-            alert("Erreur d'envoi"); 
-            btn.disabled = false; 
+        }
+    }).catch(() => {
+        alert("Erreur d'envoi");
+        this.isSending = false;
+        if (btn) {
+            btn.disabled = false;
             btn.innerHTML = "💾 ARCHIVER LE SERVICE";
-        });
-    },
+        }
+    });
+},
 
     closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
     saveToStorage() { localStorage.setItem('vesuvio_v29', JSON.stringify(this.state)); },
