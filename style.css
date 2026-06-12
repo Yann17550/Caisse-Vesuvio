@@ -270,12 +270,12 @@ input:focus { border-color: var(--accent); outline: none; background: #fff; box-
     margin-top: 16px;
 }
 
+/* --- Cash en colonne --- */
 .cash-columns {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: 1fr;
+    gap: 14px;
     margin-top: 16px;
-    align-items: start;
 }
 
 .cash-column {
@@ -301,7 +301,7 @@ input:focus { border-color: var(--accent); outline: none; background: #fff; box-
 
 .cash-item {
     display: grid;
-    grid-template-columns: 1fr 90px;
+    grid-template-columns: 1fr 88px;
     align-items: center;
     gap: 10px;
 }
@@ -310,15 +310,22 @@ input:focus { border-color: var(--accent); outline: none; background: #fff; box-
     margin: 0;
     font-weight: 600;
     color: #334155;
+    font-size: 0.98rem;
 }
 
 .cash-item input {
     width: 100%;
-    text-align: right;
+    min-height: 44px;
+    text-align: center;
+    font-size: 1rem;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-sizing: border-box;
 }
 
-@media (max-width: 640px) {
+@media (min-width: 768px) {
     .cash-columns {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
     }
 }
