@@ -221,10 +221,17 @@ openRecap() {
 renderFinalRecap(f) {
     const title = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CLÔTURE SOIR';
     const row = (l, v) => `<div class="recap-row"><span>${l}</span><b>${(v || 0).toFixed(2)}€</b></div>`;
-    const inputRow = (label, id, value, type = 'number', step = 'any') => `
-        <div class="input-group" style="margin-bottom:10px;">
-            <label>${label}</label>
-            <input type="${type}" id="${id}" value="${value || 0}" inputmode="${type === 'number' ? 'decimal' : 'numeric'}" step="${step}">
+        const compactInputRow = (label, id, value, type = 'number', step = 'any') => `
+        <div class="input-group" style="margin-bottom:8px;">
+            <label style="font-size:0.9rem; margin-bottom:4px; display:block;">${label}</label>
+            <input
+                type="${type}"
+                id="${id}"
+                value="${value || 0}"
+                inputmode="${type === 'number' ? 'decimal' : 'numeric'}"
+                step="${step}"
+                style="padding:8px 10px; font-size:0.95rem; min-height:38px;"
+            >
         </div>
     `;
 
@@ -269,15 +276,24 @@ renderFinalRecap(f) {
         html += `
             <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
                 <h3 style="margin:0 0 10px 0;">Compléments service</h3>
-                ${inputRow("🍕 Pizzas Emportées", "recap-piz-e", f.pizzas_e || 0, "number", "1")}
-                ${inputRow("🍽️ Couverts (Place)", "recap-piz-p", f.pizzas_p || 0, "number", "1")}
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:end;">
+                    ${compactInputRow("🍕 Emportées", "recap-piz-e", f.pizzas_e || 0, "number", "1")}
+                    ${compactInputRow("🍽️ Couverts", "recap-piz-p", f.pizzas_p || 0, "number", "1")}
+                </div>
             </div>
 
             <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
                 <h3 style="margin:0 0 10px 0;">TTC par taux</h3>
-                ${inputRow("TVA 5,5%", "recap-tva5", f.tva5 || 0)}
-                ${inputRow("TVA 10%", "recap-tva10", f.tva10 || 0)}
-                ${inputRow("TVA 20%", "recap-tva20", f.tva20 || 0)}
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    ${compactInputRow("TVA 5,5%", "recap-tva5", f.tva5 || 0)}
+                    ${compactInputRow("TVA 10%", "recap-tva10", f.tva10 || 0)}
+                </div>
+
+                <div style="margin-top:8px; max-width:160px;">
+                    ${compactInputRow("TVA 20%", "recap-tva20", f.tva20 || 0)}
+                </div>
             </div>
         `;
     }
