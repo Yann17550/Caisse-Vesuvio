@@ -350,7 +350,9 @@ send() {
         this.isSending = false;
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = "💾 ARCHIVER LE SERVICE";
+            btn.innerHTML = (serviceEnCours === 'Midi')
+                ? "💾 ARCHIVER LE MIDI"
+                : "💾 ARCHIVER LE SERVICE";
         }
     });
 },
