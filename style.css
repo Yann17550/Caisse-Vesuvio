@@ -263,3 +263,29 @@ input:focus { border-color: var(--accent); outline: none; background: #fff; box-
     border-color: var(--accent); 
 }
 .type-selector input { display: none; }
+.cash-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.cash-column h3 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    color: #1e293b;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 6px;
+}
+
+.cash-column .cash-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 640px) {
+    .cash-columns {
+        grid-template-columns: 1fr;
+    }
+}
