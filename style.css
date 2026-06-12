@@ -270,18 +270,51 @@ input:focus { border-color: var(--accent); outline: none; background: #fff; box-
     margin-top: 16px;
 }
 
+.cash-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+    align-items: start;
+}
+
+.cash-column {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+}
+
 .cash-column h3 {
-    margin: 0 0 10px 0;
+    margin: 0 0 12px 0;
     font-size: 1rem;
     color: #1e293b;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #cbd5e1;
     padding-bottom: 6px;
 }
 
 .cash-column .cash-grid {
     display: grid;
     grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.cash-item {
+    display: grid;
+    grid-template-columns: 1fr 90px;
+    align-items: center;
     gap: 10px;
+}
+
+.cash-item label {
+    margin: 0;
+    font-weight: 600;
+    color: #334155;
+}
+
+.cash-item input {
+    width: 100%;
+    text-align: right;
 }
 
 @media (max-width: 640px) {
