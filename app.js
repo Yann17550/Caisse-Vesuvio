@@ -287,7 +287,7 @@ renderFinalRecap(f) {
             </div>
         </div>
 
-        <button class="btn-primary" style="margin-top:15px; width:100%;" onclick="app.confirmRecapAndSend()">💾 ARCHIVER LE SERVICE</button>
+        <button class="btn-primary" style="margin-top:15px; width:100%;" onclick="app.confirmRecapAndSend()">${submitLabel}</button>
     `;
 
     document.getElementById('recap-body').innerHTML = html;
