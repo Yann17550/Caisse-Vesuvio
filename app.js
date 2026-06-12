@@ -54,10 +54,15 @@ const app = {
         window.scrollTo(0,0);
     },
 
-    renderCashGrid() {
-        const units = [100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1];
-        const container = document.getElementById('cash-container');
-        if(!container) return;
+renderCashGrid() {
+    const billets = [100, 50, 20, 10, 5];
+    const pieces = [2, 1, 0.5, 0.2, 0.1];
+
+    const billetsContainer = document.getElementById('cash-billets-container');
+    const piecesContainer = document.getElementById('cash-pieces-container');
+
+    const renderInputs = (units, container) => {
+        if (!container) return;
 
         container.innerHTML = units.map(u => {
             let def = "";
@@ -65,16 +70,20 @@ const app = {
             if (u === 10 || u === 5) def = "4";
             if (u === 2 || u === 1) def = "10";
             if (u === 0.5 || u === 0.2 || u === 0.1) def = "5";
-            
+
             return `
                 <div class="cash-item">
                     <label>${u}€</label>
                     <input type="number" data-unit="${u}" class="cash-in" inputmode="numeric" value="${def}"
-                           onfocus="if(this.value=='${def}') this.value='';" 
+                           onfocus="if(this.value=='${def}') this.value='';"
                            onblur="if(this.value=='') this.value='${def}'; app.refreshUI();">
                 </div>`;
         }).join('');
-    },
+    };
+
+    renderInputs(billets, billetsContainer);
+    renderInputs(pieces, piecesContainer);
+},
 
     toggleAncvInput() {
         const isPapier = document.getElementById('type-p').checked;
