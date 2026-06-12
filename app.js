@@ -406,11 +406,48 @@ const app = {
             this.lastExport.tva5 = parseFloat(document.getElementById('recap-tva5')?.value) || 0;
             this.lastExport.tva10 = parseFloat(document.getElementById('recap-tva10')?.value) || 0;
             this.lastExport.tva20 = parseFloat(document.getElementById('recap-tva20')?.value) || 0;
+
+            if (!this.validateRecapBeforeSend()) {
+                return;
+            }
         }
 
         this.send();
     },
+    validateRecapBeforeSend() {
+        if (!this.lastExport) return false;
 
+        const totalEncaissements = parseFloat((
+            (this.lastExport.posCashLogiciel || 0) +
+            (this.lastExport.cb || 0) +
+            (this.lastExport.tr || 0) +
+            (this.lastExport.checks || 0) +
+            (this.lastExport.ancvP || 0) +
+            (this.lastExport.ancvC || 0)
+        ).toFixed(2));
+
+        const totalTva = parseFloat((
+            (this.lastExport.tva5 || 0) +
+            (this.lastExport.tva10 || 0) +
+            (this.lastExport.tva20 || 0)
+        ).toFixed(2));
+
+        const ecart = parseFloat((totalEncaissements - totalTva).toFixed(2));
+
+        if (ecart !== 0) {
+            alert(
+                "⚠️ Vérification impossible :\n\n" +
+                "Le total des encaissements ne correspond pas au total des TVA.\n\n" +
+                "Encaissements : " + totalEncaissements.toFixed(2) + "€\n" +
+                "TVA : " + totalTva.toFixed(2) + "€\n" +
+                "Écart : " + ecart.toFixed(2) + "€\n\n" +
+                "Vérifie les montants saisis avant d'archiver."
+            );
+            return false;
+        }
+
+        return true;
+    },
     send() {
         if (this.isSending) return;
         this.isSending = true;
