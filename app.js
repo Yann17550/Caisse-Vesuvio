@@ -406,12 +406,12 @@ const app = {
             this.lastExport.tva5 = parseFloat(document.getElementById('recap-tva5')?.value) || 0;
             this.lastExport.tva10 = parseFloat(document.getElementById('recap-tva10')?.value) || 0;
             this.lastExport.tva20 = parseFloat(document.getElementById('recap-tva20')?.value) || 0;
-
-            if (!this.validateRecapBeforeSend()) {
-                return;
-            }
         }
-
+    
+        if (!this.validateRecapBeforeSend()) {
+            return;
+        }
+    
         this.send();
     },
     validateRecapBeforeSend() {
