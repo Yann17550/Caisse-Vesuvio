@@ -1,18 +1,23 @@
 const app = {
     state: {
         service: 'Midi',
-        ancv: [], checks: [], mypos: [],
+        ancv: [],
+        checks: [],
+        mypos: [],
         fondCaisse: 134.00
     },
-    CONFIG: { SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw-Ovrq3YgPdlAH2SbQhBU90N4xcpfTxZSbbGNiTLao3hjz6Lk8QZwYB-a4pIWshT9PDA/exec" },
+
+    CONFIG: {
+        SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw-Ovrq3YgPdlAH2SbQhBU90N4xcpfTxZSbbGNiTLao3hjz6Lk8QZwYB-a4pIWshT9PDA/exec"
+    },
 
     init() {
         this.loadFromStorage();
         this.renderCashGrid();
-        
+
         const fInput = document.getElementById('fond-caisse-input');
-        if(fInput) fInput.value = this.state.fondCaisse.toFixed(2);
-        
+        if (fInput) fInput.value = this.state.fondCaisse.toFixed(2);
+
         this.setService(this.state.service);
         this.bindEvents();
         this.refreshUI();
@@ -21,69 +26,77 @@ const app = {
     setService(mode) {
         this.state.service = mode;
         document.body.className = (mode === 'Midi') ? 'theme-midi' : 'theme-soir';
-        
+
         const bM = document.getElementById('btn-midi');
         const bS = document.getElementById('btn-soir');
-        if(bM) bM.className = (mode === 'Midi') ? 'active-midi' : '';
-        if(bS) bS.className = (mode === 'Soir') ? 'active-soir' : '';
-        
+        if (bM) bM.className = (mode === 'Midi') ? 'active-midi' : '';
+        if (bS) bS.className = (mode === 'Soir') ? 'active-soir' : '';
+
         const viewMidi = document.getElementById('view-midi-fast');
         const containerSoir = document.getElementById('views-soir-container');
         const navMidiBtn = document.getElementById('nav-midi-btn');
         const soirOnlyBtns = document.querySelectorAll('.soir-only');
 
         if (mode === 'Midi') {
-            if(viewMidi) viewMidi.classList.remove('hidden');
-            if(containerSoir) containerSoir.classList.add('hidden');
-            if(navMidiBtn) navMidiBtn.classList.remove('hidden');
+            if (viewMidi) viewMidi.classList.remove('hidden');
+            if (containerSoir) containerSoir.classList.add('hidden');
+            if (navMidiBtn) navMidiBtn.classList.remove('hidden');
             soirOnlyBtns.forEach(b => b.classList.add('hidden'));
         } else {
-            if(viewMidi) viewMidi.classList.add('hidden');
-            if(containerSoir) containerSoir.classList.remove('hidden');
-            if(navMidiBtn) navMidiBtn.classList.add('hidden');
+            if (viewMidi) viewMidi.classList.add('hidden');
+            if (containerSoir) containerSoir.classList.remove('hidden');
+            if (navMidiBtn) navMidiBtn.classList.add('hidden');
             soirOnlyBtns.forEach(b => b.classList.remove('hidden'));
             this.showView('view-cards-soir');
         }
+
         this.saveToStorage();
     },
 
     showView(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
         const target = document.getElementById(id);
-        if(target) target.classList.remove('hidden');
-        window.scrollTo(0,0);
+        if (target) target.classList.remove('hidden');
+        window.scrollTo(0, 0);
     },
 
-renderCashGrid() {
-    const billets = [100, 50, 20, 10, 5];
-    const pieces = [2, 1, 0.5, 0.2, 0.1];
+    renderCashGrid() {
+        const billets = [100, 50, 20, 10, 5];
+        const pieces = [2, 1, 0.5, 0.2, 0.1];
 
-    const billetsContainer = document.getElementById('cash-billets-container');
-    const piecesContainer = document.getElementById('cash-pieces-container');
+        const billetsContainer = document.getElementById('cash-billets-container');
+        const piecesContainer = document.getElementById('cash-pieces-container');
 
-    const renderInputs = (units, container) => {
-        if (!container) return;
+        const renderInputs = (units, container) => {
+            if (!container) return;
 
-        container.innerHTML = units.map(u => {
-            let def = "";
-            if (u === 20) def = "2";
-            if (u === 10 || u === 5) def = "4";
-            if (u === 2 || u === 1) def = "10";
-            if (u === 0.5 || u === 0.2 || u === 0.1) def = "5";
+            container.innerHTML = units.map(u => {
+                let def = "";
+                if (u === 20) def = "2";
+                if (u === 10 || u === 5) def = "4";
+                if (u === 2 || u === 1) def = "10";
+                if (u === 0.5 || u === 0.2 || u === 0.1) def = "5";
 
-            return `
-                <div class="cash-item">
-                    <label>${u}€</label>
-                    <input type="number" data-unit="${u}" class="cash-in" inputmode="numeric" value="${def}"
-                           onfocus="if(this.value=='${def}') this.value='';"
-                           onblur="if(this.value=='') this.value='${def}'; app.refreshUI();">
-                </div>`;
-        }).join('');
-    };
+                return `
+                    <div class="cash-item">
+                        <label>${u}€</label>
+                        <input
+                            type="number"
+                            data-unit="${u}"
+                            class="cash-in"
+                            inputmode="numeric"
+                            value="${def}"
+                            onfocus="if(this.value=='${def}') this.value='';"
+                            onblur="if(this.value=='') this.value='${def}'; app.refreshUI();"
+                        >
+                    </div>
+                `;
+            }).join('');
+        };
 
-    renderInputs(billets, billetsContainer);
-    renderInputs(pieces, piecesContainer);
-},
+        renderInputs(billets, billetsContainer);
+        renderInputs(pieces, piecesContainer);
+    },
 
     toggleAncvInput() {
         const isPapier = document.getElementById('type-p').checked;
@@ -91,7 +104,7 @@ renderCashGrid() {
         document.getElementById('ancv-values-connect').classList.toggle('hidden', isPapier);
         document.getElementById('ancv-qty-wrapper').classList.toggle('hidden', !isPapier);
     },
-    
+
     addItem(type) {
         if (type === 'mypos') {
             const v = parseFloat(document.getElementById('mypos-amt-soir').value);
@@ -106,281 +119,376 @@ renderCashGrid() {
             const q = isPapier ? parseInt(document.getElementById('ancv-qty-soir').value) : 1;
             const t = document.querySelector('input[name="ancv-t"]:checked').value;
             let v = 0;
+
             if (t === 'Papier') {
                 v = parseFloat(document.querySelector('input[name="ancv-v-fixe"]:checked').value);
             } else {
                 v = parseFloat(document.getElementById('ancv-val-soir').value);
             }
+
             if (q > 0 && v > 0) {
                 this.state.ancv.push({ val: v, qty: q, type: t });
                 document.getElementById('ancv-qty-soir').value = '';
                 document.getElementById('ancv-val-soir').value = '';
             }
         }
+
         this.refreshUI();
     },
 
-    removeItem(t, i) { this.state[t].splice(i, 1); this.refreshUI(); },
+    removeItem(t, i) {
+        this.state[t].splice(i, 1);
+        this.refreshUI();
+    },
 
     refreshUI() {
         const fInput = document.getElementById('fond-caisse-input');
         if (fInput) this.state.fondCaisse = parseFloat(fInput.value) || 0;
-        
-        let brut = 0;
-        document.querySelectorAll('.cash-in').forEach(i => brut += (parseFloat(i.dataset.unit) * (parseInt(i.value) || 0)));
-        const net = brut - this.state.fondCaisse;
-        
-        const netDisp = document.getElementById('cash-net-display');
-        if(netDisp) netDisp.textContent = net.toFixed(2);
 
-        // --- TOTAUX CB / TR / AMEX / MYPOS ---
+        let brut = 0;
+        document.querySelectorAll('.cash-in').forEach(i => {
+            brut += (parseFloat(i.dataset.unit) * (parseInt(i.value) || 0));
+        });
+
+        const net = brut - this.state.fondCaisse;
+
+        const netDisp = document.getElementById('cash-net-display');
+        if (netDisp) netDisp.textContent = net.toFixed(2);
+
         const g = id => parseFloat(document.getElementById(id)?.value) || 0;
 
-        const totalCB    = g('cb-contact-soir') + g('cb-sans-contact-soir');
-        const totalTR    = g('tr-contact-soir') + g('tr-sans-contact-soir');
-        const totalAMEX  = g('amex-contact-soir') + g('amex-sans-contact-soir');
+        const totalCB = g('cb-contact-soir') + g('cb-sans-contact-soir');
+        const totalTR = g('tr-contact-soir') + g('tr-sans-contact-soir');
+        const totalAMEX = g('amex-contact-soir') + g('amex-sans-contact-soir');
         const totalMyPos = this.state.mypos.reduce((a, b) => a + b, 0);
 
-        const dispCB    = document.getElementById('total-cb-display');
-        const dispTR    = document.getElementById('total-tr-display');
-        const dispAMEX  = document.getElementById('total-amex-display');
+        const dispCB = document.getElementById('total-cb-display');
+        const dispTR = document.getElementById('total-tr-display');
+        const dispAMEX = document.getElementById('total-amex-display');
         const dispMyPos = document.getElementById('total-mypos-display');
 
-        if(dispCB)    dispCB.textContent    = totalCB.toFixed(2);
-        if(dispTR)    dispTR.textContent    = totalTR.toFixed(2);
-        if(dispAMEX)  dispAMEX.textContent  = totalAMEX.toFixed(2);
-        if(dispMyPos) dispMyPos.textContent = totalMyPos.toFixed(2);
+        if (dispCB) dispCB.textContent = totalCB.toFixed(2);
+        if (dispTR) dispTR.textContent = totalTR.toFixed(2);
+        if (dispAMEX) dispAMEX.textContent = totalAMEX.toFixed(2);
+        if (dispMyPos) dispMyPos.textContent = totalMyPos.toFixed(2);
 
         this.updateList('mypos-recap-soir', this.state.mypos, 'mypos');
         this.updateList('checks-recap-soir', this.state.checks, 'checks');
         this.updateList('ancv-recap-soir', this.state.ancv, 'ancv', true);
+
         this.saveToStorage();
     },
 
     updateList(id, data, typeKey, isAncv = false) {
-        const el = document.getElementById(id); if (!el) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+
         el.innerHTML = data.map((v, i) => {
-            const txt = isAncv ? `${v.type} ${v.qty}x${v.val}€` : `${typeKey.toUpperCase()} ${v}€`;
-            return `<div class="list-item"><span>${txt}</span><button onclick="app.removeItem('${typeKey}', ${i})">❌</button></div>`;
+            const txt = isAncv
+                ? `${v.type} ${v.qty}x${v.val}€`
+                : `${typeKey.toUpperCase()} ${v}€`;
+
+            return `
+                <div class="list-item">
+                    <span>${txt}</span>
+                    <button onclick="app.removeItem('${typeKey}', ${i})">❌</button>
+                </div>
+            `;
         }).join('');
     },
 
-openRecap() {
-    const v = id => parseFloat(document.getElementById(id)?.value) || 0;
-    const netVal = parseFloat(document.getElementById('cash-net-display')?.textContent) || 0;
-    
-    if (this.state.service === 'Midi') {
-        this.lastExport = {
-            service: 'Midi', 
-            cb: v('midi-cb'),
-            tr: v('midi-tr'),
-            mypos: v('midi-mypos'),
-            cashNet: v('midi-cash'),
-            ancvP: v('midi-ancv-p'),
-            ancvC: v('midi-ancv-c'),
-            checks: v('midi-checks'),
-            pizzas_e: v('midi-piz-e'),
-            pizzas_p: v('midi-piz-p'),
-            tva5: v('midi-tva5'),
-            tva10: v('midi-tva10'),
-            tva20: v('midi-tva20'),
-            posCashLogiciel: v('midi-cash'),
-            deltaCash: 0
-        };
-    } else {
-        const oldExport = this.lastExport || {};
+    openRecap() {
+        const v = id => parseFloat(document.getElementById(id)?.value) || 0;
+        const netVal = parseFloat(document.getElementById('cash-net-display')?.textContent) || 0;
 
-        const recapPizE = parseFloat(document.getElementById('recap-piz-e')?.value);
-        const recapPizP = parseFloat(document.getElementById('recap-piz-p')?.value);
-        const recapTva5 = parseFloat(document.getElementById('recap-tva5')?.value);
-        const recapTva10 = parseFloat(document.getElementById('recap-tva10')?.value);
-        const recapTva20 = parseFloat(document.getElementById('recap-tva20')?.value);
-
-        this.lastExport = {
-            service: 'Soir',
-            cb: (v('cb-contact-soir') + v('cb-sans-contact-soir') + v('amex-contact-soir') + v('amex-sans-contact-soir')),
-            tr: (v('tr-contact-soir') + v('tr-sans-contact-soir')),
-            mypos: this.state.mypos.reduce((a, b) => a + b, 0),
-            cashNet: netVal,
-            ancvP: this.state.ancv.filter(i => i.type === 'Papier').reduce((a, b) => a + (b.val * b.qty), 0),
-            ancvC: this.state.ancv.filter(i => i.type === 'Connect').reduce((a, b) => a + (b.val * b.qty), 0),
-            checks: this.state.checks.reduce((a, b) => a + b, 0),
-            pizzas_e: isNaN(recapPizE) ? (oldExport.pizzas_e || 0) : recapPizE,
-            pizzas_p: isNaN(recapPizP) ? (oldExport.pizzas_p || 0) : recapPizP,
-            tva5: isNaN(recapTva5) ? (oldExport.tva5 || 0) : recapTva5,
-            tva10: isNaN(recapTva10) ? (oldExport.tva10 || 0) : recapTva10,
-            tva20: isNaN(recapTva20) ? (oldExport.tva20 || 0) : recapTva20,
-            posCashLogiciel: v('pos-cash-soir')
-        };
-
-        this.lastExport.deltaCash = parseFloat((this.lastExport.cashNet - this.lastExport.posCashLogiciel).toFixed(2));
-    }
-
-    this.renderFinalRecap(this.lastExport);
-},
-renderFinalRecap(f) {
-    const title = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CLÔTURE SOIR';
-    const row = (l, v) => `<div class="recap-row"><span>${l}</span><b>${(v || 0).toFixed(2)}€</b></div>`;
-        const compactInputRow = (label, id, value, type = 'number', step = 'any') => `
-        <div class="input-group" style="margin-bottom:8px;">
-            <label style="font-size:0.9rem; margin-bottom:4px; display:block;">${label}</label>
-            <input
-                type="${type}"
-                id="${id}"
-                value="${value || 0}"
-                inputmode="${type === 'number' ? 'decimal' : 'numeric'}"
-                step="${step}"
-                style="padding:8px 10px; font-size:0.95rem; min-height:38px;"
-            >
-        </div>
-    `;
-
-    const caTotal = (f.cb || 0) + (f.tr || 0) + (f.ancvP || 0) + (f.ancvC || 0) + (f.checks || 0) + (f.posCashLogiciel || 0);
-    const submitLabel = (f.service === 'Midi') ? '💾 ARCHIVER LE MIDI' : '💾 ARCHIVER LE SERVICE';
-    
-    let html = `
-        <div class="recap-list-final">
-            <h2 style="margin:0 0 10px 0; border-bottom:2px solid #333;">${title}</h2>
-
-            ${row("Esp. Logiciel (Z)", f.posCashLogiciel)}
-            ${row("CB + AMEX", f.cb)}
-            ${row("CB TR", f.tr)}
-            ${row("Chèques", f.checks)}
-            ${row("ANCV P.", f.ancvP)}
-            ${row("ANCV C.", f.ancvC)}
-
-            <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-                
-                ${row("Esp. Réel (Compté)", f.cashNet)}
-                ${row("MyPos", f.mypos)}
-                <div class="recap-row" style="margin-top:5px; border-top:1px dashed #ccc;">
-                    <span>ÉCART</span><b style="color:${f.deltaCash < 0 ? '#dc2626' : '#16a34a'}">${(f.deltaCash || 0).toFixed(2)}€</b>
-                </div>
-            </div>
-    `;
-
-    if (f.service === 'Midi') {
-        html += `
-            <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-                <div class="recap-row"><span>🍕 Emportées</span><b>${f.pizzas_e || 0}</b></div>
-                <div class="recap-row"><span>🍕 Sur place</span><b>${f.pizzas_p || 0}</b></div>
-            </div>
-
-            <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-                ${row("TVA 5,5%", f.tva5)}
-                ${row("TVA 10%", f.tva10)}
-                ${row("TVA 20%", f.tva20)}
-            </div>
-        `;
-    } else {
-        html += `
-            <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-                <h3 style="margin:0 0 10px 0;">Compléments service</h3>
-
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:end;">
-                    ${compactInputRow("🍕 Emportées", "recap-piz-e", f.pizzas_e || 0, "number", "1")}
-                    ${compactInputRow("🍽️ Couverts", "recap-piz-p", f.pizzas_p || 0, "number", "1")}
-                </div>
-            </div>
-
-            <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-                <h3 style="margin:0 0 10px 0;">TTC par taux</h3>
-
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    ${compactInputRow("TVA 5,5%", "recap-tva5", f.tva5 || 0)}
-                    ${compactInputRow("TVA 10%", "recap-tva10", f.tva10 || 0)}
-                </div>
-
-                <div style="margin-top:8px; max-width:160px;">
-                    ${compactInputRow("TVA 20%", "recap-tva20", f.tva20 || 0)}
-                </div>
-            </div>
-        `;
-    }
-
-    html += `
-            <div class="recap-row" style="background:#334155; padding:8px; border-radius:5px;">
-                <span style="color:#f8fafc;">CA TOTAL RÉEL</span><b style="color:#ffffff;">${caTotal.toFixed(2)}€</b>
-            </div>
-        </div>
-
-        <button class="btn-primary" style="margin-top:15px; width:100%;" onclick="app.confirmRecapAndSend()">${submitLabel}</button>
-    `;
-
-    document.getElementById('recap-body').innerHTML = html;
-    document.getElementById('modal-recap').classList.remove('hidden');
-},
-confirmRecapAndSend() {
-    if (this.state.service === 'Soir') {
-        this.lastExport.pizzas_e = parseFloat(document.getElementById('recap-piz-e')?.value) || 0;
-        this.lastExport.pizzas_p = parseFloat(document.getElementById('recap-piz-p')?.value) || 0;
-        this.lastExport.tva5 = parseFloat(document.getElementById('recap-tva5')?.value) || 0;
-        this.lastExport.tva10 = parseFloat(document.getElementById('recap-tva10')?.value) || 0;
-        this.lastExport.tva20 = parseFloat(document.getElementById('recap-tva20')?.value) || 0;
-    }
-
-    this.send();
-},
-send() {
-    if (this.isSending) return;
-    this.isSending = true;
-
-    const btn = document.querySelector('#modal-recap .btn-primary');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = "⌛ Envoi...";
-    }
-
-    let dataToSend = JSON.parse(JSON.stringify(this.lastExport));
-    const serviceEnCours = this.state.service;
-
-    const params = new URLSearchParams({ payload: JSON.stringify(dataToSend) });
-    const url = `${this.CONFIG.SCRIPT_URL}?${params.toString()}`;
-
-    fetch(url, { method: 'GET', mode: 'no-cors' })
-    .then(() => {
-        this.isSending = false;
-
-    if(serviceEnCours === 'Midi') {
-            alert("✅ Midi archivé !");
-            this.state.ancv = [];
-            this.state.checks = [];
-            this.state.mypos = [];
-            this.saveToStorage();
-            this.setService('Soir');
-            this.closeRecap();
-            location.reload();
+        if (this.state.service === 'Midi') {
+            this.lastExport = {
+                service: 'Midi',
+                cb: v('midi-cb'),
+                tr: v('midi-tr'),
+                mypos: v('midi-mypos'),
+                cashNet: v('midi-cash'),
+                ancvP: v('midi-ancv-p'),
+                ancvC: v('midi-ancv-c'),
+                checks: v('midi-checks'),
+                pizzas_e: v('midi-piz-e'),
+                pizzas_p: v('midi-piz-p'),
+                tva5: v('midi-tva5'),
+                tva10: v('midi-tva10'),
+                tva20: v('midi-tva20'),
+                posCashLogiciel: v('midi-cash'),
+                deltaCash: 0
+            };
         } else {
-            this.closeRecap();
-            this.state.ancv = [];
-            this.state.checks = [];
-            this.state.mypos = [];
-            localStorage.removeItem('vesuvio_v29');
-            if (typeof FondCaisseModule !== 'undefined') {
-                FondCaisseModule.showFinalGuide();
-            } else {
-                location.reload();
-            }
-        }
-    }).catch(() => {
-        alert("Erreur d'envoi");
-        this.isSending = false;
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = (serviceEnCours === 'Midi')
-                ? "💾 ARCHIVER LE MIDI"
-                : "💾 ARCHIVER LE SERVICE";
-        }
-    });
-},
+            const oldExport = this.lastExport || {};
 
-    closeRecap() { document.getElementById('modal-recap').classList.add('hidden'); },
-    saveToStorage() { localStorage.setItem('vesuvio_v29', JSON.stringify(this.state)); },
-    loadFromStorage() { const s = JSON.parse(localStorage.getItem('vesuvio_v29')); if(s) this.state = s; },
-    bindEvents() { 
+            const recapPizE = parseFloat(document.getElementById('recap-piz-e')?.value);
+            const recapPizP = parseFloat(document.getElementById('recap-piz-p')?.value);
+            const recapTva5 = parseFloat(document.getElementById('recap-tva5')?.value);
+            const recapTva10 = parseFloat(document.getElementById('recap-tva10')?.value);
+            const recapTva20 = parseFloat(document.getElementById('recap-tva20')?.value);
+
+            this.lastExport = {
+                service: 'Soir',
+                cb: v('cb-contact-soir') + v('cb-sans-contact-soir') + v('amex-contact-soir') + v('amex-sans-contact-soir'),
+                tr: v('tr-contact-soir') + v('tr-sans-contact-soir'),
+                mypos: this.state.mypos.reduce((a, b) => a + b, 0),
+                cashNet: netVal,
+                ancvP: this.state.ancv
+                    .filter(i => i.type === 'Papier')
+                    .reduce((a, b) => a + (b.val * b.qty), 0),
+                ancvC: this.state.ancv
+                    .filter(i => i.type === 'Connect')
+                    .reduce((a, b) => a + (b.val * b.qty), 0),
+                checks: this.state.checks.reduce((a, b) => a + b, 0),
+                pizzas_e: isNaN(recapPizE) ? (oldExport.pizzas_e || 0) : recapPizE,
+                pizzas_p: isNaN(recapPizP) ? (oldExport.pizzas_p || 0) : recapPizP,
+                tva5: isNaN(recapTva5) ? (oldExport.tva5 || 0) : recapTva5,
+                tva10: isNaN(recapTva10) ? (oldExport.tva10 || 0) : recapTva10,
+                tva20: isNaN(recapTva20) ? (oldExport.tva20 || 0) : recapTva20,
+                posCashLogiciel: v('pos-cash-soir')
+            };
+
+            this.lastExport.deltaCash = parseFloat(
+                (this.lastExport.cashNet - this.lastExport.posCashLogiciel).toFixed(2)
+            );
+        }
+
+        this.renderFinalRecap(this.lastExport);
+    },
+
+    renderFinalRecap(f) {
+        const title = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CLÔTURE SOIR';
+        const row = (l, v) => `<div class="recap-row"><span>${l}</span><b>${(v || 0).toFixed(2)}€</b></div>`;
+
+        const caTotal =
+            (f.cb || 0) +
+            (f.tr || 0) +
+            (f.ancvP || 0) +
+            (f.ancvC || 0) +
+            (f.checks || 0) +
+            (f.posCashLogiciel || 0);
+
+        const submitLabel = (f.service === 'Midi')
+            ? '💾 ARCHIVER LE MIDI'
+            : '💾 ARCHIVER LE SERVICE';
+
+        let html = `
+            <div class="recap-list-final">
+                <h2 style="margin:0 0 10px 0; border-bottom:2px solid #333;">${title}</h2>
+
+                ${row("Esp. Logiciel (Z)", f.posCashLogiciel)}
+                ${row("CB + AMEX", f.cb)}
+                ${row("CB TR", f.tr)}
+                ${row("Chèques", f.checks)}
+                ${row("ANCV P.", f.ancvP)}
+                ${row("ANCV C.", f.ancvC)}
+
+                <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
+                    ${row("Esp. Réel (Compté)", f.cashNet)}
+                    ${row("MyPos", f.mypos)}
+                    <div class="recap-row" style="margin-top:5px; border-top:1px dashed #ccc;">
+                        <span>ÉCART</span>
+                        <b style="color:${f.deltaCash < 0 ? '#dc2626' : '#16a34a'}">
+                            ${(f.deltaCash || 0).toFixed(2)}€
+                        </b>
+                    </div>
+                </div>
+        `;
+
+        if (f.service === 'Midi') {
+            html += `
+                <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
+                    <div class="recap-row"><span>🍕 Emportées</span><b>${f.pizzas_e || 0}</b></div>
+                    <div class="recap-row"><span>🍕 Sur place</span><b>${f.pizzas_p || 0}</b></div>
+                </div>
+
+                <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
+                    ${row("TVA 5,5%", f.tva5)}
+                    ${row("TVA 10%", f.tva10)}
+                    ${row("TVA 20%", f.tva20)}
+                </div>
+            `;
+        } else {
+            html += `
+                <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
+                    <h3 style="margin:0 0 8px 0; font-size:1rem;">Fréquentation</h3>
+
+                    <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px;">
+                        <div>
+                            <label for="recap-piz-e" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">Emportées</label>
+                            <input
+                                type="number"
+                                id="recap-piz-e"
+                                value="${f.pizzas_e || 0}"
+                                inputmode="numeric"
+                                step="1"
+                                style="width:100%; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="recap-piz-p" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">Couverts</label>
+                            <input
+                                type="number"
+                                id="recap-piz-p"
+                                value="${f.pizzas_p || 0}"
+                                inputmode="numeric"
+                                step="1"
+                                style="width:100%; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
+                    <h3 style="margin:0 0 8px 0; font-size:1rem;">TTC par taux</h3>
+
+                    <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px;">
+                        <div>
+                            <label for="recap-tva5" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 5,5%</label>
+                            <input
+                                type="number"
+                                id="recap-tva5"
+                                value="${f.tva5 || 0}"
+                                inputmode="decimal"
+                                step="any"
+                                style="width:100%; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="recap-tva10" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 10%</label>
+                            <input
+                                type="number"
+                                id="recap-tva10"
+                                value="${f.tva10 || 0}"
+                                inputmode="decimal"
+                                step="any"
+                                style="width:100%; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="recap-tva20" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 20%</label>
+                            <input
+                                type="number"
+                                id="recap-tva20"
+                                value="${f.tva20 || 0}"
+                                inputmode="decimal"
+                                step="any"
+                                style="width:100%; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
+                            >
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `
+                <div class="recap-row" style="background:#334155; padding:8px; border-radius:5px;">
+                    <span style="color:#f8fafc;">CA TOTAL RÉEL</span>
+                    <b style="color:#ffffff;">${caTotal.toFixed(2)}€</b>
+                </div>
+            </div>
+
+            <button class="btn-primary" style="margin-top:15px; width:100%;" onclick="app.confirmRecapAndSend()">${submitLabel}</button>
+        `;
+
+        document.getElementById('recap-body').innerHTML = html;
+        document.getElementById('modal-recap').classList.remove('hidden');
+    },
+
+    confirmRecapAndSend() {
+        if (this.state.service === 'Soir') {
+            this.lastExport.pizzas_e = parseFloat(document.getElementById('recap-piz-e')?.value) || 0;
+            this.lastExport.pizzas_p = parseFloat(document.getElementById('recap-piz-p')?.value) || 0;
+            this.lastExport.tva5 = parseFloat(document.getElementById('recap-tva5')?.value) || 0;
+            this.lastExport.tva10 = parseFloat(document.getElementById('recap-tva10')?.value) || 0;
+            this.lastExport.tva20 = parseFloat(document.getElementById('recap-tva20')?.value) || 0;
+        }
+
+        this.send();
+    },
+
+    send() {
+        if (this.isSending) return;
+        this.isSending = true;
+
+        const btn = document.querySelector('#modal-recap .btn-primary');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = "⌛ Envoi...";
+        }
+
+        const dataToSend = JSON.parse(JSON.stringify(this.lastExport));
+        const serviceEnCours = this.state.service;
+
+        const params = new URLSearchParams({
+            payload: JSON.stringify(dataToSend)
+        });
+        const url = `${this.CONFIG.SCRIPT_URL}?${params.toString()}`;
+
+        fetch(url, { method: 'GET', mode: 'no-cors' })
+            .then(() => {
+                this.isSending = false;
+
+                if (serviceEnCours === 'Midi') {
+                    alert("✅ Midi archivé !");
+                    this.state.ancv = [];
+                    this.state.checks = [];
+                    this.state.mypos = [];
+                    this.saveToStorage();
+                    this.setService('Soir');
+                    this.closeRecap();
+                    location.reload();
+                } else {
+                    this.closeRecap();
+                    this.state.ancv = [];
+                    this.state.checks = [];
+                    this.state.mypos = [];
+                    localStorage.removeItem('vesuvio_v29');
+
+                    if (typeof FondCaisseModule !== 'undefined') {
+                        FondCaisseModule.showFinalGuide();
+                    } else {
+                        location.reload();
+                    }
+                }
+            })
+            .catch(() => {
+                alert("Erreur d'envoi");
+                this.isSending = false;
+
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = (serviceEnCours === 'Midi')
+                        ? "💾 ARCHIVER LE MIDI"
+                        : "💾 ARCHIVER LE SERVICE";
+                }
+            });
+    },
+
+    closeRecap() {
+        document.getElementById('modal-recap').classList.add('hidden');
+    },
+
+    saveToStorage() {
+        localStorage.setItem('vesuvio_v29', JSON.stringify(this.state));
+    },
+
+    loadFromStorage() {
+        const s = JSON.parse(localStorage.getItem('vesuvio_v29'));
+        if (s) this.state = s;
+    },
+
+    bindEvents() {
         document.addEventListener('input', () => this.refreshUI());
+
         document.addEventListener('focusin', (e) => {
-            if(e.target.tagName === 'INPUT' && e.target.value === '0') e.target.value = '';
+            if (e.target.tagName === 'INPUT' && e.target.value === '0') {
+                e.target.value = '';
+            }
         });
     }
 };
