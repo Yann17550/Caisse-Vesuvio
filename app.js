@@ -1,4 +1,5 @@
 const app = {
+    // État global de l'application
     state: {
         service: 'Midi',
         ancv: [],
@@ -7,10 +8,15 @@ const app = {
         fondCaisse: 134.00
     },
 
+    // Configuration des URL et variables d'environnement
     CONFIG: {
         SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw-Ovrq3YgPdlAH2SbQhBU90N4xcpfTxZSbbGNiTLao3hjz6Lk8QZwYB-a4pIWshT9PDA/exec"
     },
 
+    /**
+     * Initialise l'application au chargement
+     * Restaure le stockage, génère l'UI et attache les événements.
+     */
     init() {
         this.loadFromStorage();
         this.renderCashGrid();
@@ -23,6 +29,10 @@ const app = {
         this.refreshUI();
     },
 
+    /**
+     * Change le service actif (Midi ou Soir)
+     * Met à jour les classes CSS, le thème global et sauvegarde l'état.
+     */
     setService(mode) {
         this.state.service = mode;
         document.body.className = (mode === 'Midi') ? 'theme-midi' : 'theme-soir';
@@ -53,6 +63,10 @@ const app = {
         this.saveToStorage();
     },
 
+    /**
+     * Gère la navigation entre les différentes sections de l'UI
+     * Masque toutes les vues et affiche la vue ciblée.
+     */
     showView(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
         const target = document.getElementById(id);
@@ -60,6 +74,10 @@ const app = {
         window.scrollTo(0, 0);
     },
 
+    /**
+     * Génère la grille de saisie pour les billets et les pièces.
+     * Injecte le HTML pour chaque dénomination monétaire.
+     */
     renderCashGrid() {
         const billets = [100, 50, 20, 10, 5];
         const pieces = [2, 1, 0.5, 0.2, 0.1];
@@ -98,6 +116,9 @@ const app = {
         renderInputs(pieces, piecesContainer);
     },
 
+    /**
+     * Bascule l'affichage des options ANCV selon le type (Papier ou Connect).
+     */
     toggleAncvInput() {
         const isPapier = document.getElementById('type-p').checked;
         document.getElementById('ancv-values-papier').classList.toggle('hidden', !isPapier);
@@ -105,6 +126,10 @@ const app = {
         document.getElementById('ancv-qty-wrapper').classList.toggle('hidden', !isPapier);
     },
 
+    /**
+     * Ajoute un encaissement à la liste correspondante (MyPos, Chèques, ANCV).
+     * Valide l'entrée avant l'insertion dans l'état global.
+     */
     addItem(type) {
         if (type === 'mypos') {
             const v = parseFloat(document.getElementById('mypos-amt-soir').value);
@@ -136,11 +161,18 @@ const app = {
         this.refreshUI();
     },
 
+    /**
+     * Supprime un encaissement d'une liste spécifique via son index.
+     */
     removeItem(t, i) {
         this.state[t].splice(i, 1);
         this.refreshUI();
     },
 
+    /**
+     * Rafraîchit les totaux de l'interface principale.
+     * Calcule le net des espèces, CB, MyPos, et met à jour les affichages HTML.
+     */
     refreshUI() {
         const fInput = document.getElementById('fond-caisse-input');
         if (fInput) this.state.fondCaisse = parseFloat(fInput.value) || 0;
@@ -179,6 +211,9 @@ const app = {
         this.saveToStorage();
     },
 
+    /**
+     * Met à jour le HTML des mini-listes (MyPos, Chèques, ANCV)
+     */
     updateList(id, data, typeKey, isAncv = false) {
         const el = document.getElementById(id);
         if (!el) return;
@@ -197,6 +232,10 @@ const app = {
         }).join('');
     },
 
+    /**
+     * Prépare les données et ouvre la modale récapitulative.
+     * Différencie le calcul en fonction du service Midi/Soir.
+     */
     openRecap() {
         const v = id => parseFloat(document.getElementById(id)?.value) || 0;
         const netVal = parseFloat(document.getElementById('cash-net-display')?.textContent) || 0;
@@ -257,11 +296,13 @@ const app = {
         this.renderFinalRecap(this.lastExport);
     },
 
+    /**
+     * Génère dynamiquement l'interface HTML de la modale récapitulative
+     * Initialise la modale dans un état vierge (pas d'erreur affichée).
+     */
     renderFinalRecap(f) {
         const title = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CLÔTURE SOIR';
         const row = (l, v) => `<div class="recap-row"><span>${l}</span><b>${(v || 0).toFixed(2)}€</b></div>`;
-        const validation = this.validateRecapBeforeSend();
-        const recapInvalid = !validation.ok;
 
         const caTotal =
             (f.cb || 0) +
@@ -279,14 +320,12 @@ const app = {
             <div class="recap-list-final">
                 <h2 style="margin:0 0 10px 0; border-bottom:2px solid #333;">${title}</h2>
 
-                ${recapInvalid ? `
-                    <div class="error-box">
-                        ⚠️ TVA non conforme<br>
-                        Encaissements : ${validation.totalEncaissements.toFixed(2)}€<br>
-                        TVA : ${validation.totalTva.toFixed(2)}€<br>
-                        Écart : ${validation.ecart.toFixed(2)}€
-                    </div>
-                ` : ''}
+                <div id="recap-error-box" class="error-box" style="display:none;">
+                    ⚠️ TVA non conforme<br>
+                    Encaissements : <span id="err-enc"></span>€<br>
+                    TVA : <span id="err-tva"></span>€<br>
+                    Écart : <span id="err-ecart"></span>€
+                </div>
 
                 ${row("Esp. Logiciel (Z)", f.posCashLogiciel)}
                 ${row("CB + AMEX", f.cb)}
@@ -334,6 +373,7 @@ const app = {
                                 value="${f.pizzas_e || 0}"
                                 inputmode="numeric"
                                 step="1"
+                                oninput="app.updateModalValidation()"
                                 style="width:100%; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
                             >
                         </div>
@@ -346,6 +386,7 @@ const app = {
                                 value="${f.pizzas_p || 0}"
                                 inputmode="numeric"
                                 step="1"
+                                oninput="app.updateModalValidation()"
                                 style="width:100%; padding:6px 4px; font-size:0.88rem; min-height:34px; text-align:center;"
                             >
                         </div>
@@ -364,6 +405,7 @@ const app = {
                                 value="${f.tva5 || 0}"
                                 inputmode="decimal"
                                 step="any"
+                                oninput="app.updateModalValidation()"
                                 style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
                             >
                         </div>
@@ -376,6 +418,7 @@ const app = {
                                 value="${f.tva10 || 0}"
                                 inputmode="decimal"
                                 step="any"
+                                oninput="app.updateModalValidation()"
                                 style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
                             >
                         </div>
@@ -388,6 +431,7 @@ const app = {
                                 value="${f.tva20 || 0}"
                                 inputmode="decimal"
                                 step="any"
+                                oninput="app.updateModalValidation()"
                                 style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
                             >
                         </div>
@@ -404,25 +448,55 @@ const app = {
             </div>
 
             <button
-                class="btn-primary ${recapInvalid ? 'btn-disabled' : ''}"
+                class="btn-primary"
                 style="margin-top:15px; width:100%;"
-                ${recapInvalid ? 'disabled' : ''}
                 onclick="app.confirmRecapAndSend()"
             >
                 ${submitLabel}
             </button>
         `;
 
+        // Réinitialisation de la classe de la modale à l'ouverture (on retire le rouge)
         const modalContent = document.querySelector('#modal-recap .modal-content');
         if (modalContent) {
-            modalContent.classList.toggle('recap-error', recapInvalid);
+            modalContent.classList.remove('recap-error');
         }
 
         document.getElementById('recap-body').innerHTML = html;
         document.getElementById('modal-recap').classList.remove('hidden');
     },
 
+    /**
+     * NOUVEAU COMPORTEMENT: Ne déclenche plus de validation punitive pendant la saisie.
+     * Retire simplement l'indicateur d'erreur visuel dès que l'utilisateur commence à modifier une valeur,
+     * l'invitant ainsi à re-soumettre sa correction.
+     */
+    updateModalValidation() {
+        if (this.state.service === 'Soir') {
+            const v = id => parseFloat(document.getElementById(id)?.value) || 0;
+            this.lastExport.pizzas_e = v('recap-piz-e');
+            this.lastExport.pizzas_p = v('recap-piz-p');
+            this.lastExport.tva5 = v('recap-tva5');
+            this.lastExport.tva10 = v('recap-tva10');
+            this.lastExport.tva20 = v('recap-tva20');
+        }
+
+        // Retire le fond rouge dès qu'on touche à une case pour signifier le mode "édition"
+        const modalContent = document.querySelector('#modal-recap .modal-content');
+        if (modalContent && modalContent.classList.contains('recap-error')) {
+            modalContent.classList.remove('recap-error');
+            const errorBox = document.getElementById('recap-error-box');
+            if (errorBox) errorBox.style.display = 'none';
+        }
+    },
+
+    /**
+     * Vérifie la validité des données AU MOMENT du clic sur l'archivage.
+     * Si les comptes sont mauvais, la modale devient rouge et bloque l'envoi.
+     * Si c'est bon, lance la requête réseau.
+     */
     confirmRecapAndSend() {
+        // MAJ des valeurs juste avant l'envoi
         if (this.state.service === 'Soir') {
             this.lastExport.pizzas_e = parseFloat(document.getElementById('recap-piz-e')?.value) || 0;
             this.lastExport.pizzas_p = parseFloat(document.getElementById('recap-piz-p')?.value) || 0;
@@ -432,13 +506,34 @@ const app = {
         }
 
         const validation = this.validateRecapBeforeSend();
+
+        // Si l'écart de TVA n'est pas nul -> on punit visuellement et on annule l'envoi
         if (!validation.ok) {
-            return;
+            const modalContent = document.querySelector('#modal-recap .modal-content');
+            if (modalContent) modalContent.classList.add('recap-error');
+
+            const errorBox = document.getElementById('recap-error-box');
+            if (errorBox) {
+                errorBox.style.display = 'block';
+                const errEnc = document.getElementById('err-enc');
+                const errTva = document.getElementById('err-tva');
+                const errEcart = document.getElementById('err-ecart');
+                
+                if (errEnc) errEnc.textContent = validation.totalEncaissements.toFixed(2);
+                if (errTva) errTva.textContent = validation.totalTva.toFixed(2);
+                if (errEcart) errEcart.textContent = validation.ecart.toFixed(2);
+            }
+            return; // Bloque l'exécution de la suite
         }
 
+        // Si tout est validé, on procède à l'envoi
         this.send();
     },
 
+    /**
+     * Compare mathématiquement le total des encaissements et les TVA associées.
+     * Retourne le statut de validité complet pour influencer l'UI.
+     */
     validateRecapBeforeSend() {
         if (!this.lastExport) {
             return {
@@ -474,6 +569,10 @@ const app = {
         };
     },
 
+    /**
+     * Processus d'envoi des données validées vers l'API externe (Google Script).
+     * Gère l'état d'envoi pour éviter les doublons et assure le nettoyage final.
+     */
     send() {
         if (this.isSending) return;
         this.isSending = true;
@@ -532,14 +631,24 @@ const app = {
             });
     },
 
+    /**
+     * Masque le modal récapitulatif sans l'effacer du DOM.
+     */
     closeRecap() {
         document.getElementById('modal-recap').classList.add('hidden');
     },
 
+    /**
+     * Sérialise et sauvegarde l'état actuel de la caisse dans le LocalStorage.
+     */
     saveToStorage() {
         localStorage.setItem('vesuvio_v29', JSON.stringify(this.state));
     },
 
+    /**
+     * Charge l'état de la caisse depuis le LocalStorage au démarrage.
+     * Injecte un état d'usine sécurisé en cas d'erreur de parse.
+     */
     loadFromStorage() {
         try {
             const raw = localStorage.getItem('vesuvio_v29');
@@ -574,6 +683,10 @@ const app = {
         }
     },
 
+    /**
+     * Attache les écouteurs d'événements globaux à l'application.
+     * Inclut le nettoyage du zéro sur focus des inputs.
+     */
     bindEvents() {
         document.addEventListener('input', () => this.refreshUI());
 
