@@ -446,9 +446,8 @@ const app = {
             this.lastExport.tva20 = parseFloat(document.getElementById('recap-tva20')?.value) || 0;
         }
     
-        if (!this.validateRecapBeforeSend()) {
-            return;
-        }
+        const validation = this.validateRecapBeforeSend();
+        if (!validation.ok) return;
     
         this.send();
     },
