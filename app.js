@@ -276,25 +276,11 @@ const app = {
             : '💾 ARCHIVER LE SERVICE';
 
         let html = `
-            <div class="recap-list-final" style="
-                background:${recapInvalid ? '#fee2e2' : 'transparent'};
-                border:${recapInvalid ? '2px solid #dc2626' : 'none'};
-                border-radius:10px;
-                padding:${recapInvalid ? '10px' : '0'};
-            ">
+            <div class="recap-list-final">
                 <h2 style="margin:0 0 10px 0; border-bottom:2px solid #333;">${title}</h2>
 
                 ${recapInvalid ? `
-                    <div style="
-                        margin:0 0 12px 0;
-                        padding:10px;
-                        background:#fff1f2;
-                        border:1px solid #ef4444;
-                        border-radius:8px;
-                        color:#991b1b;
-                        font-size:0.92rem;
-                        font-weight:600;
-                    ">
+                    <div class="error-box">
                         ⚠️ TVA non conforme<br>
                         Encaissements : ${validation.totalEncaissements.toFixed(2)}€<br>
                         TVA : ${validation.totalTva.toFixed(2)}€<br>
@@ -418,20 +404,19 @@ const app = {
             </div>
 
             <button
-                class="btn-primary"
-                style="
-                    margin-top:15px;
-                    width:100%;
-                    opacity:${recapInvalid ? '0.5' : '1'};
-                    pointer-events:${recapInvalid ? 'none' : 'auto'};
-                    filter:${recapInvalid ? 'grayscale(0.2)' : 'none'};
-                "
+                class="btn-primary ${recapInvalid ? 'btn-disabled' : ''}"
+                style="margin-top:15px; width:100%;"
                 ${recapInvalid ? 'disabled' : ''}
                 onclick="app.confirmRecapAndSend()"
             >
                 ${submitLabel}
             </button>
         `;
+
+        const modalContent = document.querySelector('#modal-recap .modal-content');
+        if (modalContent) {
+            modalContent.classList.toggle('recap-error', recapInvalid);
+        }
 
         document.getElementById('recap-body').innerHTML = html;
         document.getElementById('modal-recap').classList.remove('hidden');
@@ -555,10 +540,30 @@ const app = {
         localStorage.setItem('vesuvio_v29', JSON.stringify(this.state));
     },
 
-loadFromStorage() {
-    try {
-        const raw = localStorage.getItem('vesuvio_v29');
-        if (!raw) {
+    loadFromStorage() {
+        try {
+            const raw = localStorage.getItem('vesuvio_v29');
+            if (!raw) {
+                this.state = {
+                    service: 'Midi',
+                    ancv: [],
+                    checks: [],
+                    mypos: [],
+                    fondCaisse: 134.00
+                };
+                return;
+            }
+
+            const s = JSON.parse(raw);
+
+            this.state = {
+                service: (s?.service === 'Soir') ? 'Soir' : 'Midi',
+                ancv: Array.isArray(s?.ancv) ? s.ancv : [],
+                checks: Array.isArray(s?.checks) ? s.checks : [],
+                mypos: Array.isArray(s?.mypos) ? s.mypos : [],
+                fondCaisse: Number.isFinite(parseFloat(s?.fondCaisse)) ? parseFloat(s.fondCaisse) : 134.00
+            };
+        } catch (e) {
             this.state = {
                 service: 'Midi',
                 ancv: [],
@@ -566,28 +571,8 @@ loadFromStorage() {
                 mypos: [],
                 fondCaisse: 134.00
             };
-            return;
         }
-
-        const s = JSON.parse(raw);
-
-        this.state = {
-            service: (s?.service === 'Soir') ? 'Soir' : 'Midi',
-            ancv: Array.isArray(s?.ancv) ? s.ancv : [],
-            checks: Array.isArray(s?.checks) ? s.checks : [],
-            mypos: Array.isArray(s?.mypos) ? s.mypos : [],
-            fondCaisse: Number.isFinite(parseFloat(s?.fondCaisse)) ? parseFloat(s.fondCaisse) : 134.00
-        };
-    } catch (e) {
-        this.state = {
-            service: 'Midi',
-            ancv: [],
-            checks: [],
-            mypos: [],
-            fondCaisse: 134.00
-        };
-    }
-},,
+    },
 
     bindEvents() {
         document.addEventListener('input', () => this.refreshUI());
