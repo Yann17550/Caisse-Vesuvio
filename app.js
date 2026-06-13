@@ -260,8 +260,10 @@ const app = {
     renderFinalRecap(f) {
         const title = (f.service === 'Midi') ? 'VÉRIFICATION MIDI' : 'CLÔTURE SOIR';
         const row = (l, v) => `<div class="recap-row"><span>${l}</span><b>${(v || 0).toFixed(2)}€</b></div>`;
-
-        const caTotal =
+        const validation = this.validateRecapBeforeSend();
+        const recapInvalid = !validation.ok;
+        
+                const caTotal =
             (f.cb || 0) +
             (f.tr || 0) +
             (f.ancvP || 0) +
@@ -272,18 +274,41 @@ const app = {
         const submitLabel = (f.service === 'Midi')
             ? '💾 ARCHIVER LE MIDI'
             : '💾 ARCHIVER LE SERVICE';
-
+        
         let html = `
-            <div class="recap-list-final">
+            <div class="recap-list-final" style="
+                background:${recapInvalid ? '#fee2e2' : 'transparent'};
+                border:${recapInvalid ? '2px solid #dc2626' : 'none'};
+                border-radius:10px;
+                padding:${recapInvalid ? '10px' : '0'};
+            ">
                 <h2 style="margin:0 0 10px 0; border-bottom:2px solid #333;">${title}</h2>
-
+        
+                ${recapInvalid ? `
+                    <div style="
+                        margin:0 0 12px 0;
+                        padding:10px;
+                        background:#fff1f2;
+                        border:1px solid #ef4444;
+                        border-radius:8px;
+                        color:#991b1b;
+                        font-size:0.92rem;
+                        font-weight:600;
+                    ">
+                        ⚠️ TVA non conforme<br>
+                        Encaissements : ${validation.totalEncaissements.toFixed(2)}€<br>
+                        TVA : ${validation.totalTva.toFixed(2)}€<br>
+                        Écart : ${validation.ecart.toFixed(2)}€
+                    </div>
+                ` : ''}
+        
                 ${row("Esp. Logiciel (Z)", f.posCashLogiciel)}
                 ${row("CB + AMEX", f.cb)}
                 ${row("CB TR", f.tr)}
                 ${row("Chèques", f.checks)}
                 ${row("ANCV P.", f.ancvP)}
                 ${row("ANCV C.", f.ancvC)}
-
+        
                 <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
                     ${row("Esp. Réel (Compté)", f.cashNet)}
                     ${row("MyPos", f.mypos)}
@@ -392,7 +417,20 @@ const app = {
                 </div>
             </div>
 
-            <button class="btn-primary" style="margin-top:15px; width:100%;" onclick="app.confirmRecapAndSend()">${submitLabel}</button>
+            <button
+    class="btn-primary"
+    style="
+        margin-top:15px;
+        width:100%;
+        opacity:${recapInvalid ? '0.5' : '1'};
+        pointer-events:${recapInvalid ? 'none' : 'auto'};
+        filter:${recapInvalid ? 'grayscale(0.2)' : 'none'};
+    "
+    ${recapInvalid ? 'disabled' : ''}
+    onclick="app.confirmRecapAndSend()"
+>
+    ${submitLabel}
+</button>
         `;
 
         document.getElementById('recap-body').innerHTML = html;
@@ -415,8 +453,15 @@ const app = {
         this.send();
     },
     validateRecapBeforeSend() {
-        if (!this.lastExport) return false;
-
+        if (!this.lastExport) {
+            return {
+                ok: false,
+                totalEncaissements: 0,
+                totalTva: 0,
+                ecart: 0
+            };
+        }
+    
         const totalEncaissements = parseFloat((
             (this.lastExport.posCashLogiciel || 0) +
             (this.lastExport.cb || 0) +
@@ -425,29 +470,23 @@ const app = {
             (this.lastExport.ancvP || 0) +
             (this.lastExport.ancvC || 0)
         ).toFixed(2));
-
+    
         const totalTva = parseFloat((
             (this.lastExport.tva5 || 0) +
             (this.lastExport.tva10 || 0) +
             (this.lastExport.tva20 || 0)
         ).toFixed(2));
-
+    
         const ecart = parseFloat((totalEncaissements - totalTva).toFixed(2));
-
-        if (ecart !== 0) {
-            alert(
-                "⚠️ Vérification impossible :\n\n" +
-                "Le total des encaissements ne correspond pas au total des TVA.\n\n" +
-                "Encaissements : " + totalEncaissements.toFixed(2) + "€\n" +
-                "TVA : " + totalTva.toFixed(2) + "€\n" +
-                "Écart : " + ecart.toFixed(2) + "€\n\n" +
-                "Vérifie les montants saisis avant d'archiver."
-            );
-            return false;
-        }
-
-        return true;
+    
+        return {
+            ok: ecart === 0,
+            totalEncaissements,
+            totalTva,
+            ecart
+        };
     },
+    
     send() {
         if (this.isSending) return;
         this.isSending = true;
