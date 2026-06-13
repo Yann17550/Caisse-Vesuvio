@@ -555,10 +555,39 @@ const app = {
         localStorage.setItem('vesuvio_v29', JSON.stringify(this.state));
     },
 
-    loadFromStorage() {
-        const s = JSON.parse(localStorage.getItem('vesuvio_v29'));
-        if (s) this.state = s;
-    },
+loadFromStorage() {
+    try {
+        const raw = localStorage.getItem('vesuvio_v29');
+        if (!raw) {
+            this.state = {
+                service: 'Midi',
+                ancv: [],
+                checks: [],
+                mypos: [],
+                fondCaisse: 134.00
+            };
+            return;
+        }
+
+        const s = JSON.parse(raw);
+
+        this.state = {
+            service: (s?.service === 'Soir') ? 'Soir' : 'Midi',
+            ancv: Array.isArray(s?.ancv) ? s.ancv : [],
+            checks: Array.isArray(s?.checks) ? s.checks : [],
+            mypos: Array.isArray(s?.mypos) ? s.mypos : [],
+            fondCaisse: Number.isFinite(parseFloat(s?.fondCaisse)) ? parseFloat(s.fondCaisse) : 134.00
+        };
+    } catch (e) {
+        this.state = {
+            service: 'Midi',
+            ancv: [],
+            checks: [],
+            mypos: [],
+            fondCaisse: 134.00
+        };
+    }
+},,
 
     bindEvents() {
         document.addEventListener('input', () => this.refreshUI());
