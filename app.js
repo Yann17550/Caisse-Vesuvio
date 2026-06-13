@@ -262,8 +262,8 @@ const app = {
         const row = (l, v) => `<div class="recap-row"><span>${l}</span><b>${(v || 0).toFixed(2)}€</b></div>`;
         const validation = this.validateRecapBeforeSend();
         const recapInvalid = !validation.ok;
-        
-                const caTotal =
+
+        const caTotal =
             (f.cb || 0) +
             (f.tr || 0) +
             (f.ancvP || 0) +
@@ -274,7 +274,7 @@ const app = {
         const submitLabel = (f.service === 'Midi')
             ? '💾 ARCHIVER LE MIDI'
             : '💾 ARCHIVER LE SERVICE';
-        
+
         let html = `
             <div class="recap-list-final" style="
                 background:${recapInvalid ? '#fee2e2' : 'transparent'};
@@ -283,7 +283,7 @@ const app = {
                 padding:${recapInvalid ? '10px' : '0'};
             ">
                 <h2 style="margin:0 0 10px 0; border-bottom:2px solid #333;">${title}</h2>
-        
+
                 ${recapInvalid ? `
                     <div style="
                         margin:0 0 12px 0;
@@ -301,14 +301,14 @@ const app = {
                         Écart : ${validation.ecart.toFixed(2)}€
                     </div>
                 ` : ''}
-        
+
                 ${row("Esp. Logiciel (Z)", f.posCashLogiciel)}
                 ${row("CB + AMEX", f.cb)}
                 ${row("CB TR", f.tr)}
                 ${row("Chèques", f.checks)}
                 ${row("ANCV P.", f.ancvP)}
                 ${row("ANCV C.", f.ancvC)}
-        
+
                 <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
                     ${row("Esp. Réel (Compté)", f.cashNet)}
                     ${row("MyPos", f.mypos)}
@@ -366,47 +366,47 @@ const app = {
                     </div>
                 </div>
 
-<div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
-    <h3 style="margin:0 0 8px 0; font-size:1rem;">TTC par taux</h3>
+                <div style="margin:10px 0; padding:10px; background:#f1f5f9; border-radius:5px;">
+                    <h3 style="margin:0 0 8px 0; font-size:1rem;">TTC par taux</h3>
 
-    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; width:100%;">
-        <div style="min-width:0; width:100%;">
-            <label for="recap-tva5" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 5,5%</label>
-            <input
-                type="number"
-                id="recap-tva5"
-                value="${f.tva5 || 0}"
-                inputmode="decimal"
-                step="any"
-                style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
-            >
-        </div>
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; width:100%;">
+                        <div style="min-width:0; width:100%;">
+                            <label for="recap-tva5" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 5,5%</label>
+                            <input
+                                type="number"
+                                id="recap-tva5"
+                                value="${f.tva5 || 0}"
+                                inputmode="decimal"
+                                step="any"
+                                style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
+                            >
+                        </div>
 
-        <div style="min-width:0; width:100%;">
-            <label for="recap-tva10" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 10%</label>
-            <input
-                type="number"
-                id="recap-tva10"
-                value="${f.tva10 || 0}"
-                inputmode="decimal"
-                step="any"
-                style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
-            >
-        </div>
+                        <div style="min-width:0; width:100%;">
+                            <label for="recap-tva10" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 10%</label>
+                            <input
+                                type="number"
+                                id="recap-tva10"
+                                value="${f.tva10 || 0}"
+                                inputmode="decimal"
+                                step="any"
+                                style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
+                            >
+                        </div>
 
-        <div style="min-width:0; width:100%;">
-            <label for="recap-tva20" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 20%</label>
-            <input
-                type="number"
-                id="recap-tva20"
-                value="${f.tva20 || 0}"
-                inputmode="decimal"
-                step="any"
-                style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
-            >
-        </div>
-    </div>
-</div>
+                        <div style="min-width:0; width:100%;">
+                            <label for="recap-tva20" style="display:block; font-size:0.78rem; margin-bottom:4px; text-align:center;">TVA 20%</label>
+                            <input
+                                type="number"
+                                id="recap-tva20"
+                                value="${f.tva20 || 0}"
+                                inputmode="decimal"
+                                step="any"
+                                style="display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:6px 2px; font-size:0.88rem; min-height:34px; text-align:center;"
+                            >
+                        </div>
+                    </div>
+                </div>
             `;
         }
 
@@ -418,19 +418,19 @@ const app = {
             </div>
 
             <button
-    class="btn-primary"
-    style="
-        margin-top:15px;
-        width:100%;
-        opacity:${recapInvalid ? '0.5' : '1'};
-        pointer-events:${recapInvalid ? 'none' : 'auto'};
-        filter:${recapInvalid ? 'grayscale(0.2)' : 'none'};
-    "
-    ${recapInvalid ? 'disabled' : ''}
-    onclick="app.confirmRecapAndSend()"
->
-    ${submitLabel}
-</button>
+                class="btn-primary"
+                style="
+                    margin-top:15px;
+                    width:100%;
+                    opacity:${recapInvalid ? '0.5' : '1'};
+                    pointer-events:${recapInvalid ? 'none' : 'auto'};
+                    filter:${recapInvalid ? 'grayscale(0.2)' : 'none'};
+                "
+                ${recapInvalid ? 'disabled' : ''}
+                onclick="app.confirmRecapAndSend()"
+            >
+                ${submitLabel}
+            </button>
         `;
 
         document.getElementById('recap-body').innerHTML = html;
@@ -445,12 +445,15 @@ const app = {
             this.lastExport.tva10 = parseFloat(document.getElementById('recap-tva10')?.value) || 0;
             this.lastExport.tva20 = parseFloat(document.getElementById('recap-tva20')?.value) || 0;
         }
-    
+
         const validation = this.validateRecapBeforeSend();
-        if (!validation.ok) return;
-    
+        if (!validation.ok) {
+            return;
+        }
+
         this.send();
     },
+
     validateRecapBeforeSend() {
         if (!this.lastExport) {
             return {
@@ -460,7 +463,7 @@ const app = {
                 ecart: 0
             };
         }
-    
+
         const totalEncaissements = parseFloat((
             (this.lastExport.posCashLogiciel || 0) +
             (this.lastExport.cb || 0) +
@@ -469,15 +472,15 @@ const app = {
             (this.lastExport.ancvP || 0) +
             (this.lastExport.ancvC || 0)
         ).toFixed(2));
-    
+
         const totalTva = parseFloat((
             (this.lastExport.tva5 || 0) +
             (this.lastExport.tva10 || 0) +
             (this.lastExport.tva20 || 0)
         ).toFixed(2));
-    
+
         const ecart = parseFloat((totalEncaissements - totalTva).toFixed(2));
-    
+
         return {
             ok: ecart === 0,
             totalEncaissements,
@@ -485,7 +488,7 @@ const app = {
             ecart
         };
     },
-    
+
     send() {
         if (this.isSending) return;
         this.isSending = true;
